@@ -27,3 +27,8 @@
 *.exe
 *.out
 *.app
+
+# Input and output folders
+INPUT/
+OUTPUT/
+DATA/
