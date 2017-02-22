@@ -24,8 +24,5 @@ void calculate_observables(coord*);
 // void save_init_crowder_config();
 // void generator_warmup(double);
 void check_distances();
-
-void update_neighbor_list();
-void update_cell_list();
 void update_pair_list();
 #endif /* SOP_H */
