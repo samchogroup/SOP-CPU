@@ -13,6 +13,7 @@
 #include "params.h"
 #include "neighbor_list.h"
 #include "cell_list.h"
+#include "barnes_hut.h"
 
 int main(int argc,char* argv[])
 {

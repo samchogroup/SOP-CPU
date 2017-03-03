@@ -64,6 +64,7 @@ void set_params(int icmd)
   } else if( !strcmp(opt[opt_ptr[icmd]],"cutofftype") ) { // neighbor list on or off?
     if( !strcmp(opt[opt_ptr[icmd]+1],"neighborlist" ) ) { neighborlist = 1; }
     else if( !strcmp(opt[opt_ptr[icmd]+1],"celllist" ) ) { celllist = 1; }
+    else if( !strcmp(opt[opt_ptr[icmd]+1],"barnesHut" ) ) { barnesHut = 1; }
     else { }
 
   } else if( !strcmp(opt[opt_ptr[icmd]],"nnlup") ) { // neighbor / cell list update frequency
@@ -264,7 +265,6 @@ void alloc_arrays()
   using namespace std;
 
   // bonds
-
   k_bnd = 20.0;
   R0 = 2.0; // = 0.4*a
   R0sq = R0*R0;
@@ -276,7 +276,6 @@ void alloc_arrays()
   bnds_allocated = 1;
 
   // angles
-
   k_ang = 20.0;
   e_ang_coeff = k_ang/2.0;
   nang = 1528;
@@ -293,7 +292,6 @@ void alloc_arrays()
   f_ang_ss_coeff = 6.0*e_ang_ss_coeff;
 
   // rna-rna vdw
-
   ncon_att = 8996;
   ncon_rep = 1157632;
   // neighbor list
@@ -352,8 +350,16 @@ void alloc_arrays()
 
   lj_rna_rna_allocated = 1;
 
-  // coordinates
+  // barnes_hut tree
+  // TODO: find an appropriate size for the flat tree structure
+  // or a way to compress the tree
+  indices_bhtree = new int[2*nbead];
+  std::fill_n(indices_bhtree, 2*nbead, empty_node);
+  octet_count_bhtree = new double[2*nbead];
+  octet_width_bhtree = new double[2*nbead];
+  octet_avg_pos = new coord[2*nbead];
 
+  // coordinates
   nbead = 1530;
   pos = new coord[nbead+1];
   unc_pos = new coord[nbead+1];
@@ -369,13 +375,13 @@ void alloc_arrays()
   rna_phosphate_allocated = 1;
 
   // miscellaneous run parameters
-
   run = 1;
   generator.set_seed(-100-run);
   T = 0.6; // kcal/mol
 
   neighborlist = 0; // neighbor list cutoff method?
   celllist = 0; // cell list cutoff method?
+  barnesHut = 0;
   boxl = 500.0;
   ncell = 55.0;
   lcell = boxl / ncell;

@@ -44,7 +44,6 @@ double e_ang_ss_coeff;
 double f_ang_ss_coeff;
 
 // rna-rna vdw
-
 int ncon_att; // number of native contacts
 int ncon_rep; // repulisve non-native contact
 
@@ -55,7 +54,6 @@ int nnl_rep;
 // pair list
 int nil_att;
 int nil_rep;
-
 
 double coeff_att[3][3] = { {0.0, 0.0, 0.0},
 			   {0.0, 0.7, 0.8},
@@ -139,8 +137,13 @@ int* jtype_pair_list_rep;
 
 int lj_rna_rna_allocated = 0;
 
-// coordinates and associated params
+// barnes_hut tree
+int* indices_bhtree;
+double* octet_count_bhtree;
+double* octet_width_bhtree;
+coord* octet_avg_pos;
 
+// coordinates and associated params
 int nbead;
 coord* pos;
 coord* unc_pos; // uncorrected positions
@@ -168,6 +171,7 @@ int sim_type = 1; // integration scheme; default is underdamped
 double T; // temperature
 int neighborlist = 0; // neighbor list cutoff method?
 int celllist = 0; // cell list cutoff method?
+int barnesHut = 0;
 double boxl; // Length of an edge of the simulation box
 double ncell;
 double lcell;
@@ -208,7 +212,6 @@ int pot_term_on[mpot_term+1] = { 0, 1, 1, 0, 0,
 pot_term_Ptr pot_term[mpot_term+1];
 
 //observables
-
 double e_bnd,e_ang,e_tor,e_stack,e_elec,e_ang_ss;
 double e_vdw_rr,e_vdw_rr_att,e_vdw_rr_rep;
 double e_vdw_cc,e_vdw_rc,e_vdw_rc_rep,e_vdw_rc_att;

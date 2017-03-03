@@ -53,7 +53,6 @@ extern double e_ang_ss_coeff;
 extern double f_ang_ss_coeff;
 
 // rna-rna vdw info
-
 extern int ncon_att; // number of native contacts
 extern int ncon_rep; // repulisve non-native contact
 
@@ -125,8 +124,15 @@ extern double e_vdw_rr;
 extern double e_vdw_rr_att;
 extern double e_vdw_rr_rep;
 
-// coordinates and associated params
+// barnes_hut tree
+const int empty_node = -1;
+const int inner_node = -2;
+extern int* indices_bhtree;
+extern double* octet_count_bhtree;
+extern double* octet_width_bhtree;
+extern coord* octet_avg_pos;
 
+// coordinates and associated params
 extern int nbead;
 extern int ncrowder;
 extern int nbead_tot;
@@ -142,7 +148,6 @@ extern int force_allocated;
 extern int natpos_allocated;
 
 // miscellaneous run paramaters;
-
 extern int run;
 extern Ran_Gen generator; // the random number generator
 extern int restart; // are we restarting an old simulation?
@@ -151,6 +156,7 @@ extern int sim_type; // integration scheme 1 = underdamped; 2 = overdamped
 extern double T; // temperature (kcal/mol)
 extern int neighborlist; // neighbor list cutoff method?
 extern int celllist; // cell list cutoff method?
+extern int barnesHut; // barnes hut cutoff method?
 extern double minT; // minimum temperature determines crowder cutoffs
 extern double boxl; // Length of an edge of the simulation box
 extern double ncell;
@@ -214,9 +220,7 @@ extern double e_vdw_rr,e_vdw_rr_att,e_vdw_rr_rep;
 extern double e_vdw_cc,e_vdw_rc,e_vdw_rc_rep,e_vdw_rc_att;
 extern double rna_etot,system_etot;
 
-
 // native info
-
 extern int* rna_base;
 extern int rna_base_allocated;
 extern int* rna_phosphate;
