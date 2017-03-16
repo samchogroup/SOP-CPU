@@ -144,6 +144,11 @@ void print_sim_params() {
 
     sprintf(oline,"Number of Cells Each Dimension    : %.0lf", ncell);
     cout << oline << endl;
+  } else if(barnesHut == 1) {
+    sprintf(oline,"Long-range Cutoff Type            : %s", "Barnes Hut Tree");
+    cout << oline << endl;
+    sprintf(oline,"Initial Box Size                  : %.1f", bh_boxsize);
+    cout << oline << endl;
   } else {
     sprintf(oline,"Long-range Cutoff Type            : %s", "None");
     cout << oline << endl;

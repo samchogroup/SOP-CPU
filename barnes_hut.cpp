@@ -29,9 +29,9 @@ int find_subtree_index(coord *center, int current_node){
 }
 
 void update_center_mass(int current_node, int bead_index){
-  octet_avg_pos[current_node].x += unc_pos[bead_index].x;
-  octet_avg_pos[current_node].y += unc_pos[bead_index].y;
-  octet_avg_pos[current_node].z += unc_pos[bead_index].z;
+  octet_center_mass[current_node].x += unc_pos[bead_index].x;
+  octet_center_mass[current_node].y += unc_pos[bead_index].y;
+  octet_center_mass[current_node].z += unc_pos[bead_index].z;
 }
 
 coord * get_udpated_center(coord *boxCenter, coord* subtree, double width){
@@ -57,13 +57,12 @@ void insert_bead_bhtree(int tree_index, int bead_index, coord *boxCenter, double
     std::cout << "found an empty spot in " << tree_index << "... inserting" << '\n';
     indices_bhtree[tree_index] = bead_index;
     octet_count_bhtree[tree_index] = 1;
-    octet_width_bhtree[tree_index] = width;
-    octet_avg_pos[tree_index].x = boxCenter->x;
-    octet_avg_pos[tree_index].y = boxCenter->y;
-    octet_avg_pos[tree_index].z = boxCenter->z;
+    octet_center_mass[tree_index].x = boxCenter->x;
+    octet_center_mass[tree_index].y = boxCenter->y;
+    octet_center_mass[tree_index].z = boxCenter->z;
 
-  } else if (indices_bhtree[tree_index] == inner_node){
-    std::cout << "found an inner node in " << tree_index << "... inserting recursively" << '\n';
+  } else if (indices_bhtree[tree_index] == internal_node){
+    std::cout << "found an internal node in " << tree_index << "... inserting recursively" << '\n';
     octet_count_bhtree[tree_index] = octet_count_bhtree[tree_index]+1;
     update_center_mass(tree_index, bead_index);
 
@@ -74,9 +73,9 @@ void insert_bead_bhtree(int tree_index, int bead_index, coord *boxCenter, double
     delete newCenter;
 
   } else {
-    std::cout << "found a leaf in " << tree_index << "... will make inner and insert recursively" << '\n';
+    std::cout << "found a leaf in " << tree_index << "... will make internal and insert recursively" << '\n';
     int a_bead_index = indices_bhtree[tree_index];
-    indices_bhtree[tree_index] = inner_node;
+    indices_bhtree[tree_index] = internal_node;
     octet_count_bhtree[tree_index] = 2;
     update_center_mass(tree_index, bead_index);
 

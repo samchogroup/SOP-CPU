@@ -126,11 +126,11 @@ extern double e_vdw_rr_rep;
 
 // barnes_hut tree
 const int empty_node = -1;
-const int inner_node = -2;
+const int internal_node = -2;
+extern double bh_boxsize;
 extern int* indices_bhtree;
 extern double* octet_count_bhtree;
-extern double* octet_width_bhtree;
-extern coord* octet_avg_pos;
+extern coord* octet_center_mass;
 
 // coordinates and associated params
 extern int nbead;

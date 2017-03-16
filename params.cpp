@@ -67,6 +67,9 @@ void set_params(int icmd)
     else if( !strcmp(opt[opt_ptr[icmd]+1],"barnesHut" ) ) { barnesHut = 1; }
     else { }
 
+  } else if (!strcmp(opt[opt_ptr[icmd]],"bh_boxsize")){
+    bh_boxsize = atof(opt[opt_ptr[icmd]+1]);
+
   } else if( !strcmp(opt[opt_ptr[icmd]],"nnlup") ) { // neighbor / cell list update frequency
     nnlup = atoi(opt[opt_ptr[icmd]+1]);
 
@@ -356,8 +359,7 @@ void alloc_arrays()
   indices_bhtree = new int[2*nbead];
   std::fill_n(indices_bhtree, 2*nbead, empty_node);
   octet_count_bhtree = new double[2*nbead];
-  octet_width_bhtree = new double[2*nbead];
-  octet_avg_pos = new coord[2*nbead];
+  octet_center_mass = new coord[2*nbead];
 
   // coordinates
   nbead = 1530;
