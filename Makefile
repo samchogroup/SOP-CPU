@@ -28,7 +28,7 @@ params.o: ./global.h ./params.h
 neighbor_list.o: ./global.h ./neighbor_list.h
 		$(CC) -c ./neighbor_list.cpp -o ./neighbor_list.o
 
-neighbor_list.o: ./global.h ./cell_list.h
+cell_list.o: ./global.h ./cell_list.h
 		$(CC) -c ./cell_list.cpp -o ./cell_list.o
 
 clean:
