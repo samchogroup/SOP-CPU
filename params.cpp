@@ -353,14 +353,6 @@ void alloc_arrays()
 
   lj_rna_rna_allocated = 1;
 
-  // barnes_hut tree
-  // TODO: find an appropriate size for the flat tree structure
-  // or a way to compress the tree
-  indices_bhtree = new int[2*nbead];
-  std::fill_n(indices_bhtree, 2*nbead, empty_node);
-  octet_count_bhtree = new double[2*nbead];
-  octet_center_mass = new coord[2*nbead];
-
   // coordinates
   nbead = 1530;
   pos = new coord[nbead+1];
@@ -375,6 +367,12 @@ void alloc_arrays()
   force_allocated = 1;
   rna_base_allocated = 1;
   rna_phosphate_allocated = 1;
+
+  // barnes_hut tree
+  indices_bhtree = new int[32*nbead]();
+  std::fill_n(indices_bhtree, 32*nbead, empty_node);
+  octet_count_bhtree = new double[32*nbead];
+  octet_center_mass = new coord[32*nbead];
 
   // miscellaneous run parameters
   run = 1;

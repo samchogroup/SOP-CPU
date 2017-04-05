@@ -7,6 +7,7 @@ class coord {
  public:
   coord();
   ~coord();
+  void print();
   double x;
   double y;
   double z;

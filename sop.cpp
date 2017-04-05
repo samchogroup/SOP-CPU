@@ -123,6 +123,8 @@ void underdamped_ctrl()
   } else if (celllist == 1) {
     update_cell_list();
     update_pair_list();
+  } else if (barnesHut == 1){
+    build_bh_tree();
   }
 
   set_potential();
@@ -159,6 +161,8 @@ void underdamped_ctrl()
           update_neighbor_list();
         } else if (celllist == 1) {
           update_cell_list();
+        } else if (barnesHut == 1){
+          build_bh_tree();
         }
 	//	fprintf(stderr, "(%.0lf) neighbor list: (%d/%d)\n", istep, nnl_att, nnl_rep);
         inlup = 0;

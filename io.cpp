@@ -147,8 +147,6 @@ void print_sim_params() {
   } else if(barnesHut == 1) {
     sprintf(oline,"Long-range Cutoff Type            : %s", "Barnes Hut Tree");
     cout << oline << endl;
-    sprintf(oline,"Initial Box Size                  : %.1f", bh_boxsize);
-    cout << oline << endl;
   } else {
     sprintf(oline,"Long-range Cutoff Type            : %s", "None");
     cout << oline << endl;

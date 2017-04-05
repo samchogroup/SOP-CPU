@@ -1,6 +1,9 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <iostream>
+#include <cstring>
+#include <unistd.h>
 #include "global.h"
 #include <math.h>
 
@@ -12,6 +15,11 @@ coord::coord() {
 
 coord::~coord() {
 }
+
+void coord::print() {
+  std::cout << "[" << x << " " << y << " " << z << "]" ;
+}
+
 const int debug = 0;
 
 int ncmd;
