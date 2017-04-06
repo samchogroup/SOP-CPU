@@ -369,10 +369,9 @@ void alloc_arrays()
   rna_phosphate_allocated = 1;
 
   // barnes_hut tree
-  indices_bhtree = new int[32*nbead]();
-  std::fill_n(indices_bhtree, 32*nbead, empty_node);
-  octet_count_bhtree = new double[32*nbead];
-  octet_center_mass = new coord[32*nbead];
+  indices_bhtree = new int[16*nbead]();
+  octet_count_bhtree = new double[16*nbead];
+  octet_center_mass = new coord[16*nbead];
 
   // miscellaneous run parameters
   run = 1;

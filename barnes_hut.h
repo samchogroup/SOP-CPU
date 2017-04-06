@@ -3,6 +3,7 @@
 
 #include "global.h"
 
+extern int next_tree_index;
 void build_bh_tree();
 void insert_bead_bhtree(int tree_index, int bead_index, coord *boxCenter, int width);
 
