@@ -146,7 +146,6 @@ int* jtype_pair_list_rep;
 int lj_rna_rna_allocated = 0;
 
 // barnes_hut tree
-double bh_boxsize = 512.0;
 int* indices_bhtree;
 double* octet_count_bhtree;
 coord* octet_center_mass;

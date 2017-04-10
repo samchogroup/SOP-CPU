@@ -164,33 +164,33 @@ void underdamped_ctrl()
         } else if (barnesHut == 1){
           build_bh_tree();
         }
-	//	fprintf(stderr, "(%.0lf) neighbor list: (%d/%d)\n", istep, nnl_att, nnl_rep);
+	       //	fprintf(stderr, "(%.0lf) neighbor list: (%d/%d)\n", istep, nnl_att, nnl_rep);
         inlup = 0;
       }
       inlup++;
 
       if (neighborlist == 1 || celllist == 1) {
         update_pair_list();
-//	fprintf(stderr, "(%.0lf) pair list: (%d/%d)\n", istep, nil_att, nil_rep);
+        //	fprintf(stderr, "(%.0lf) pair list: (%d/%d)\n", istep, nil_att, nil_rep);
       }
 
       underdamped_iteration(incr);
       if( !(iup%nup) ) { // updates
-	energy_eval();
-	calculate_observables(incr);
+	      energy_eval();
+	      calculate_observables(incr);
         sprintf(oline,"%.0lf %f %f %f %f %f %f %f %d %f",
                 istep,T,kinT,e_bnd,e_ang_ss,e_vdw_rr,rna_etot,
                 Q,contct_nat,rgsq);
-	out << oline << endl;
-	iup = 0;
-	record_traj(binfname,uncbinfname);
-	save_coords(cfname,unccfname);
-	save_vels(vfname);
-	generator.save_state();
+	      out << oline << endl;
+	      iup = 0;
+	      record_traj(binfname,uncbinfname);
+	      save_coords(cfname,unccfname);
+	      save_vels(vfname);
+	      generator.save_state();
       }
+
       istep += 1.0;
       iup++;
-
     }
     out.close();
   }

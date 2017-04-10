@@ -67,9 +67,6 @@ void set_params(int icmd)
     else if( !strcmp(opt[opt_ptr[icmd]+1],"barnesHut" ) ) { barnesHut = 1; }
     else { }
 
-  } else if (!strcmp(opt[opt_ptr[icmd]],"bh_boxsize")){
-    bh_boxsize = atof(opt[opt_ptr[icmd]+1]);
-
   } else if( !strcmp(opt[opt_ptr[icmd]],"nnlup") ) { // neighbor / cell list update frequency
     nnlup = atoi(opt[opt_ptr[icmd]+1]);
 
