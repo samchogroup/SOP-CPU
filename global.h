@@ -128,6 +128,7 @@ extern double e_vdw_rr_rep;
 // barnes_hut tree
 const int empty_cell = 0;
 extern int* indices_bhtree;
+extern short int* vdw_matrix;
 extern double* octet_count_bhtree;
 extern coord* octet_center_mass;
 

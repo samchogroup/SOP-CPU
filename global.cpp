@@ -146,6 +146,7 @@ int* jtype_pair_list_rep;
 int lj_rna_rna_allocated = 0;
 
 // barnes_hut tree
+short int* vdw_matrix;
 int* indices_bhtree;
 double* octet_count_bhtree;
 coord* octet_center_mass;

@@ -108,6 +108,21 @@ void set_temp(double temp)
   T = temp;
 }
 
+void set_vdw_matrix()
+{
+  for( int i=1; i<=nil_att; i++ ) {
+    ibead = ibead_pair_list_att[i];
+    jbead = jbead_pair_list_att[i];
+    vdw_matrix[ibead][jbead] = i;
+  }
+
+  for( int i=1; i<=nil_rep; i++ ) {
+    ibead = ibead_pair_list_rep[i];
+    jbead = jbead_pair_list_rep[i];
+    vdw_matrix[ibead][jbead] = -i;
+  }
+}
+
 void load(int icmd)
 {
   using namespace std;
@@ -196,42 +211,45 @@ void load(int icmd)
       tokPtr = strtok(NULL," ");
       jtype = atoi(tokPtr);
       if (r_ij < rcut_nat[itype][jtype]) {
-	icon_att++;
-	ibead_lj_nat[icon_att] = ibead;
-	jbead_lj_nat[icon_att] = jbead;
-	itype_lj_nat[icon_att] = itype;
-	jtype_lj_nat[icon_att] = jtype;
-	lj_nat_pdb_dist[icon_att] = r_ij;
-	lj_nat_pdb_dist2[icon_att] = r_ij*r_ij;
-	lj_nat_pdb_dist6[icon_att] = lj_nat_pdb_dist2[icon_att]*
-	  lj_nat_pdb_dist2[icon_att]*lj_nat_pdb_dist2[icon_att];
-	lj_nat_pdb_dist12[icon_att] = lj_nat_pdb_dist6[icon_att]*
-	  lj_nat_pdb_dist6[icon_att];
+      	icon_att++;
+      	ibead_lj_nat[icon_att] = ibead;
+      	jbead_lj_nat[icon_att] = jbead;
+      	itype_lj_nat[icon_att] = itype;
+      	jtype_lj_nat[icon_att] = jtype;
+      	lj_nat_pdb_dist[icon_att] = r_ij;
+      	lj_nat_pdb_dist2[icon_att] = r_ij*r_ij;
+      	lj_nat_pdb_dist6[icon_att] = lj_nat_pdb_dist2[icon_att]*
+      	  lj_nat_pdb_dist2[icon_att]*lj_nat_pdb_dist2[icon_att];
+      	lj_nat_pdb_dist12[icon_att] = lj_nat_pdb_dist6[icon_att]*
+      	  lj_nat_pdb_dist6[icon_att];
 
-	nil_att++;
-	ibead_pair_list_att[nil_att] = ibead;
-	jbead_pair_list_att[nil_att] = jbead;
-	itype_pair_list_att[nil_att] = itype;
-	jtype_pair_list_att[nil_att] = jtype;
-	pl_lj_nat_pdb_dist[nil_att] = r_ij;
-	pl_lj_nat_pdb_dist2[nil_att] = lj_nat_pdb_dist2[icon_att];
-	pl_lj_nat_pdb_dist6[nil_att] = lj_nat_pdb_dist6[icon_att];
-	pl_lj_nat_pdb_dist12[nil_att] = lj_nat_pdb_dist12[icon_att];
+      	nil_att++;
+      	ibead_pair_list_att[nil_att] = ibead;
+      	jbead_pair_list_att[nil_att] = jbead;
+      	itype_pair_list_att[nil_att] = itype;
+      	jtype_pair_list_att[nil_att] = jtype;
+      	pl_lj_nat_pdb_dist[nil_att] = r_ij;
+      	pl_lj_nat_pdb_dist2[nil_att] = lj_nat_pdb_dist2[icon_att];
+      	pl_lj_nat_pdb_dist6[nil_att] = lj_nat_pdb_dist6[icon_att];
+      	pl_lj_nat_pdb_dist12[nil_att] = lj_nat_pdb_dist12[icon_att];
       } else {
-	icon_rep++;
-	ibead_lj_non_nat[icon_rep] = ibead;
-	jbead_lj_non_nat[icon_rep] = jbead;
-	itype_lj_non_nat[icon_rep] = itype;
-	jtype_lj_non_nat[icon_rep] = jtype;
+      	icon_rep++;
+      	ibead_lj_non_nat[icon_rep] = ibead;
+      	jbead_lj_non_nat[icon_rep] = jbead;
+      	itype_lj_non_nat[icon_rep] = itype;
+      	jtype_lj_non_nat[icon_rep] = jtype;
 
-	nil_rep++;
-	ibead_pair_list_rep[nil_rep] = ibead;
-	jbead_pair_list_rep[nil_rep] = jbead;
-	itype_pair_list_rep[nil_rep] = itype;
-	jtype_pair_list_rep[nil_rep] = jtype;
+      	nil_rep++;
+      	ibead_pair_list_rep[nil_rep] = ibead;
+      	jbead_pair_list_rep[nil_rep] = jbead;
+      	itype_pair_list_rep[nil_rep] = itype;
+      	jtype_pair_list_rep[nil_rep] = jtype;
       }
     }
     in.close();
+    if(barnesHut){
+      set_vdw_matrix();
+    }
     cout << "[Finished reading VDW interactions (" << icon_att << "/" << icon_rep <<")]" << endl;
   } else if(!strcmp(opt[opt_ptr[icmd]],"init")) { // load init coordinates
     cout << "[Reading in initial coordinates...]" << endl;
@@ -365,11 +383,6 @@ void alloc_arrays()
   rna_base_allocated = 1;
   rna_phosphate_allocated = 1;
 
-  // barnes_hut tree
-  indices_bhtree = new int[16*nbead]();
-  octet_count_bhtree = new double[16*nbead];
-  octet_center_mass = new coord[16*nbead];
-
   // miscellaneous run parameters
   run = 1;
   generator.set_seed(-100-run);
@@ -399,6 +412,13 @@ void alloc_arrays()
   strcpy(vfname,"veloc.out");
   strcpy(binfname,"traj.bin");
   strcpy(uncbinfname,"traj_uncorrected.bin");
+
+  if (barnesHut) {
+    indices_bhtree = new int[16*nbead]();
+    octet_count_bhtree = new double[16*nbead];
+    octet_center_mass = new coord[16*nbead];
+    vdw_matrix = new short int[nbead][nbead]();
+  }
 }
 
 void release_bonds()

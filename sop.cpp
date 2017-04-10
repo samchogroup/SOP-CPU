@@ -436,14 +436,14 @@ void overdamped_ctrl()
         } else if (celllist == 1) {
           update_cell_list();
         }
-	//	fprintf(stderr, "(%.0lf) neighbor list: (%d/%d)\n", istep, nnl_att, nnl_rep);
+	       //	fprintf(stderr, "(%.0lf) neighbor list: (%d/%d)\n", istep, nnl_att, nnl_rep);
         inlup = 0;
       }
       inlup++;
 
       if (neighborlist == 1 || celllist == 1) {
         update_pair_list();
-//	fprintf(stderr, "(%.0lf) pair list: (%d/%d)\n", istep, nil_att, nil_rep);
+        //	fprintf(stderr, "(%.0lf) pair list: (%d/%d)\n", istep, nil_att, nil_rep);
       }
 
       overdamped_iteration(incr);
@@ -472,7 +472,6 @@ void overdamped_ctrl()
   delete [] incr;
 
   return;
-
 }
 
 void update_pair_list() {
