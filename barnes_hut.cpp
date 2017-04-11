@@ -58,21 +58,16 @@ coord * get_udpated_center(coord *boxCenter, coord* subtree, double width){
   width = widht of the box associated with the subtree
 */
 void insert_bead_bhtree(int tree_index, int bead_index, coord *boxCenter, double width){
-  // std::cout << "INSERTING BEAD " << bead_index << " ";
-  // unc_pos[bead_index].print(); std::cout << '\n' << "In block: ";
-  // boxCenter->print(); std::cout << " " << width << '\n';
-
   if (indices_bhtree[tree_index] == empty_cell){
-    // insert node here
-    // std::cout << "found an empty spot in " << tree_index << "... inserting" << '\n';
+    /* Inseart bead with negative index */
     indices_bhtree[tree_index] = -bead_index;
     octet_count_bhtree[tree_index] = 1;
     octet_center_mass[tree_index].x = boxCenter->x;
     octet_center_mass[tree_index].y = boxCenter->y;
     octet_center_mass[tree_index].z = boxCenter->z;
 
-  } else if (indices_bhtree[tree_index] < 0) { //index is negative if there's a node in the cell
-    // std::cout << "found a leaf in " << tree_index << "... will make internal and insert recursively" << '\n';
+  } else if (indices_bhtree[tree_index] < 0) {
+    /* Index is negative if there's a node in the cell, new positive index will be added for new cell */
     int a_bead_index = -indices_bhtree[tree_index];
     indices_bhtree[tree_index] = get_next_tree_index();
     octet_count_bhtree[tree_index] = 2;
@@ -88,8 +83,8 @@ void insert_bead_bhtree(int tree_index, int bead_index, coord *boxCenter, double
     insert_bead_bhtree(subtree_indexB, bead_index, newCenterB, width/2.0);
     delete newCenterA; delete newCenterB;
 
-  } else { //a value bigger than zero means it's pointing to another cell area, so it's an internal node
-    // std::cout << "found an internal node in " << tree_index << "... inserting recursively" << '\n';
+  } else {
+    /* Positive index, internal node found */
     octet_count_bhtree[tree_index] = octet_count_bhtree[tree_index]+1;
     update_center_mass(tree_index, bead_index);
 
@@ -128,4 +123,21 @@ void build_bh_tree(){
     std::cout << i << '\n';
     insert_bead_bhtree(tree_index, i, boxCenter, boxWidth);
   }
+}
+
+void depth_traverse(int tree_index, double width, int ibody){
+  if(indices_bhtree[tree_index] == empty_cell){
+    /* Base case: empty node, return */
+    return;
+  }
+  if(indices_bhtree[tree_index] < 0){
+    /* Body found */
+
+    // do appropriate calculation
+
+  } else {
+    /* Cell found */
+
+  }
+
 }
