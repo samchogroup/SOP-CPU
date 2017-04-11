@@ -125,19 +125,33 @@ void build_bh_tree(){
   }
 }
 
-void depth_traverse(int tree_index, double width, int ibody){
+void depth_traverse(int tree_index, double width, int ibead){
   if(indices_bhtree[tree_index] == empty_cell){
     /* Base case: empty node, return */
     return;
   }
   if(indices_bhtree[tree_index] < 0){
     /* Body found */
+    int jbead = -indices_bhtree[tree_index];
+    int itype,jtype,pair_index;
+    double dx,dy,dz,d,d2,d6,d12;
 
-    // do appropriate calculation
+    pair_index = indices_bhtree[ibead][jbead];
+    itype = itype_pair_list_att[pair_index];
+    jtype = jtype_pair_list_att[pair_index];
+
+    dx = unc_pos[jbead].x - unc_pos[ibead].x;
+    dy = unc_pos[jbead].y - unc_pos[ibead].y;
+    dz = unc_pos[jbead].z - unc_pos[ibead].z;
+
+    d2 = dx*dx+dy*dy+dz*dz;
+    d6 = d2*d2*d2;
+    d12 = d6*d6;
+
+    e_vdw_rr_att += coeff_att[itype][jtype] * (pl_lj_nat_pdb_dist12[pair_index]/d12)-2.0*(pl_lj_nat_pdb_dist6[pair_index]/d6);
 
   } else {
     /* Cell found */
 
   }
-
 }
