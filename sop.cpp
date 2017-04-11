@@ -103,7 +103,6 @@ void underdamped_ctrl()
   static int first_time = 1;
 
   coord* incr = new coord[nbead+1];
-
   if( (!restart)&&first_time ) { // zero out the velocities and forces
     for( int i=1; i<=nbead; i++ ) {
       vel[i].x = 0.0;
@@ -114,18 +113,23 @@ void underdamped_ctrl()
       force[i].z = 0.0;
     }
   }
-
   print_sim_params();
+  std::cout << nnl_rep << '\n';
 
   if (neighborlist == 1) {
+    std::cout << nnl_rep << '\n';
     update_neighbor_list();
     update_pair_list();
   } else if (celllist == 1) {
+    std::cout << nnl_rep << '\n';
     update_cell_list();
     update_pair_list();
   } else if (barnesHut == 1){
+    std::cout << nnl_rep << '\n';
     build_bh_tree();
+    bh_update_pair_list();
   }
+  std::cout << nnl_rep << '\n';
 
   set_potential();
   set_forces();
@@ -143,10 +147,8 @@ void underdamped_ctrl()
   }
 
   if( first_time ) {
-
     energy_eval();
     force_eval();
-
   }
 
   if( binsave ) {
@@ -172,6 +174,8 @@ void underdamped_ctrl()
       if (neighborlist == 1 || celllist == 1) {
         update_pair_list();
         //	fprintf(stderr, "(%.0lf) pair list: (%d/%d)\n", istep, nil_att, nil_rep);
+      } if (barnesHut == 1) {
+        bh_update_pair_list();
       }
 
       underdamped_iteration(incr);

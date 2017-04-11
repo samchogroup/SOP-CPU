@@ -146,9 +146,12 @@ int* jtype_pair_list_rep;
 int lj_rna_rna_allocated = 0;
 
 // barnes_hut tree
-short int* vdw_matrix;
+double theta = 0.5;
+double theta2 = theta*theta;
+double* aux_tree_d2;
+double* aux_tree_d6;
+double* aux_tree_d12;
 int* indices_bhtree;
-double* octet_count_bhtree;
 coord* octet_center_mass;
 
 // coordinates and associated params

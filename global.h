@@ -126,10 +126,12 @@ extern double e_vdw_rr_att;
 extern double e_vdw_rr_rep;
 
 // barnes_hut tree
+extern double theta, theta2;
 const int empty_cell = 0;
 extern int* indices_bhtree;
-extern short int* vdw_matrix;
-extern double* octet_count_bhtree;
+extern double* aux_tree_d2;
+extern double* aux_tree_d6;
+extern double* aux_tree_d12;
 extern coord* octet_center_mass;
 
 // coordinates and associated params

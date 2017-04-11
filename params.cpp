@@ -67,6 +67,10 @@ void set_params(int icmd)
     else if( !strcmp(opt[opt_ptr[icmd]+1],"barnesHut" ) ) { barnesHut = 1; }
     else { }
 
+  } else if( !strcmp(opt[opt_ptr[icmd]],"theta") ) { // theta for barnes hut distance
+    theta = atof(opt[opt_ptr[icmd]+1]);
+    theta2 = theta*theta;
+
   } else if( !strcmp(opt[opt_ptr[icmd]],"nnlup") ) { // neighbor / cell list update frequency
     nnlup = atoi(opt[opt_ptr[icmd]+1]);
 
@@ -106,21 +110,6 @@ void set_temp(double temp)
   using namespace std;
 
   T = temp;
-}
-
-void set_vdw_matrix()
-{
-  for( int i=1; i<=nil_att; i++ ) {
-    ibead = ibead_pair_list_att[i];
-    jbead = jbead_pair_list_att[i];
-    vdw_matrix[ibead][jbead] = i;
-  }
-
-  for( int i=1; i<=nil_rep; i++ ) {
-    ibead = ibead_pair_list_rep[i];
-    jbead = jbead_pair_list_rep[i];
-    vdw_matrix[ibead][jbead] = -i;
-  }
 }
 
 void load(int icmd)
@@ -247,9 +236,6 @@ void load(int icmd)
       }
     }
     in.close();
-    if(barnesHut){
-      set_vdw_matrix();
-    }
     cout << "[Finished reading VDW interactions (" << icon_att << "/" << icon_rep <<")]" << endl;
   } else if(!strcmp(opt[opt_ptr[icmd]],"init")) { // load init coordinates
     cout << "[Reading in initial coordinates...]" << endl;
@@ -413,12 +399,11 @@ void alloc_arrays()
   strcpy(binfname,"traj.bin");
   strcpy(uncbinfname,"traj_uncorrected.bin");
 
-  if (barnesHut) {
-    indices_bhtree = new int[16*nbead]();
-    octet_count_bhtree = new double[16*nbead];
-    octet_center_mass = new coord[16*nbead];
-    vdw_matrix = new short int[nbead][nbead]();
-  }
+  indices_bhtree = new int[16*nbead]();
+  aux_tree_d2 = new double[16*nbead]();
+  aux_tree_d6 = new double[16*nbead]();
+  aux_tree_d12 = new double[16*nbead]();
+  octet_center_mass = new coord[16*nbead];
 }
 
 void release_bonds()

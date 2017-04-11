@@ -7,6 +7,7 @@
 #include "barnes_hut.h"
 
 int next_tree_index = 0;
+double rootWidth = 0;
 
 int get_next_tree_index(){
   int old = next_tree_index + 1;
@@ -61,7 +62,6 @@ void insert_bead_bhtree(int tree_index, int bead_index, coord *boxCenter, double
   if (indices_bhtree[tree_index] == empty_cell){
     /* Inseart bead with negative index */
     indices_bhtree[tree_index] = -bead_index;
-    octet_count_bhtree[tree_index] = 1;
     octet_center_mass[tree_index].x = boxCenter->x;
     octet_center_mass[tree_index].y = boxCenter->y;
     octet_center_mass[tree_index].z = boxCenter->z;
@@ -70,7 +70,6 @@ void insert_bead_bhtree(int tree_index, int bead_index, coord *boxCenter, double
     /* Index is negative if there's a node in the cell, new positive index will be added for new cell */
     int a_bead_index = -indices_bhtree[tree_index];
     indices_bhtree[tree_index] = get_next_tree_index();
-    octet_count_bhtree[tree_index] = 2;
     update_center_mass(tree_index, bead_index);
 
     coord *subtreeA = find_subtree_coord(width, boxCenter, a_bead_index);
@@ -85,7 +84,6 @@ void insert_bead_bhtree(int tree_index, int bead_index, coord *boxCenter, double
 
   } else {
     /* Positive index, internal node found */
-    octet_count_bhtree[tree_index] = octet_count_bhtree[tree_index]+1;
     update_center_mass(tree_index, bead_index);
 
     coord *subtree = find_subtree_coord(width, boxCenter, bead_index);
@@ -96,7 +94,7 @@ void insert_bead_bhtree(int tree_index, int bead_index, coord *boxCenter, double
   }
 }
 
-double get_initial_width(){
+double set_initial_width(){
   double width = 0.0;
   float x,y,z;
   for (int i = 0; i < nbead; i++) {
@@ -107,51 +105,93 @@ double get_initial_width(){
     width = y > width ? y : width;
     width = z > width ? z : width;
   }
-  return ceil(2*width);
+  rootWidth = ceil(2*width);
 }
 
 void build_bh_tree(){
   std::fill_n(indices_bhtree, 16*nbead, empty_cell);
   int tree_index = 0; // all insertions start in the root of the tree
-  double boxWidth = get_initial_width();
+  set_initial_width();
   coord *boxCenter = new coord(); // initial box center coordinate - 0, 0, 0
   boxCenter->x = 0.0;
   boxCenter->y = 0.0;
   boxCenter->z = 0.0;
 
   for (int i = 1; i <= nbead; i++) {
-    std::cout << i << '\n';
-    insert_bead_bhtree(tree_index, i, boxCenter, boxWidth);
+    insert_bead_bhtree(tree_index, i, boxCenter, rootWidth);
   }
+
+  delete boxCenter;
 }
 
-void depth_traverse(int tree_index, double width, int ibead){
-  if(indices_bhtree[tree_index] == empty_cell){
-    /* Base case: empty node, return */
-    return;
+int distance_index(int tree_index, int ibead, int jbead, coord *boxCenter, double width){
+  coord *subtree = find_subtree_coord(width, boxCenter, jbead);
+  int subtree_index = get_subtree_index(subtree, indices_bhtree[tree_index]);
+
+  if (aux_tree_d2[subtree_index] == 0) {
+    double s2 = width*width;
   }
-  if(indices_bhtree[tree_index] < 0){
-    /* Body found */
-    int jbead = -indices_bhtree[tree_index];
-    int itype,jtype,pair_index;
-    double dx,dy,dz,d,d2,d6,d12;
 
-    pair_index = indices_bhtree[ibead][jbead];
-    itype = itype_pair_list_att[pair_index];
-    jtype = jtype_pair_list_att[pair_index];
 
-    dx = unc_pos[jbead].x - unc_pos[ibead].x;
-    dy = unc_pos[jbead].y - unc_pos[ibead].y;
-    dz = unc_pos[jbead].z - unc_pos[ibead].z;
 
-    d2 = dx*dx+dy*dy+dz*dz;
-    d6 = d2*d2*d2;
-    d12 = d6*d6;
+  // coord *newCenter = get_udpated_center(boxCenter, subtree, width);
+  // insert_bead_bhtree(subtree_index, bead_index, newCenter, width/2.0);
 
-    e_vdw_rr_att += coeff_att[itype][jtype] * (pl_lj_nat_pdb_dist12[pair_index]/d12)-2.0*(pl_lj_nat_pdb_dist6[pair_index]/d6);
+  // delete newCenter;
+}
 
-  } else {
-    /* Cell found */
+void bh_update_pair_list(){
+  std::fill_n(aux_tree_d2, 16*nbead, empty_cell);
+  nil_att = 0;
+  nil_rep = 0;
+  unsigned int ibead, jbead, itype, jtype;
+
+  coord *boxCenter = new coord();
+  boxCenter->x = 0.0;
+  boxCenter->y = 0.0;
+  boxCenter->z = 0.0;
+
+  /* attractive interactions */
+
+  for (int i=1; i<=nnl_att; i++) {
+    ibead = ibead_neighbor_list_att[i];
+    jbead = jbead_neighbor_list_att[i];
+    itype = itype_neighbor_list_att[i];
+    jtype = jtype_neighbor_list_att[i];
+
+    std::cout << ibead << '\n';
+
+    // int index = distance_index(0, ibead, jbead, boxCenter, rootWidth);
+
+    // if (aux_tree_d2[index] < rcut2) {
+    //   // add to interaction pair list
+    //   nil_att++;
+    //   ibead_pair_list_att[nil_att] = ibead;
+    //   jbead_pair_list_att[nil_att] = jbead;
+    //   itype_pair_list_att[nil_att] = itype;
+    //   jtype_pair_list_att[nil_att] = jtype;
+    //   pl_lj_nat_pdb_dist[nil_att] = nl_lj_nat_pdb_dist[i];
+    //   pl_lj_nat_pdb_dist2[nil_att] = nl_lj_nat_pdb_dist2[i];
+    //   pl_lj_nat_pdb_dist6[nil_att] = nl_lj_nat_pdb_dist6[i];
+    //   pl_lj_nat_pdb_dist12[nil_att] = nl_lj_nat_pdb_dist12[i];
+    // }
+  }
+
+  // std::cout << "----------------------------------------------------------\n";
+
+  std::fill_n(aux_tree_d2, 16*nbead, empty_cell);
+
+  /* repulsive interactions */
+  for (int i=1; i<=nnl_rep; i++) {
+
+    ibead = ibead_neighbor_list_rep[i];
+    jbead = jbead_neighbor_list_rep[i];
+    itype = itype_neighbor_list_rep[i];
+    jtype = jtype_neighbor_list_rep[i];
+
+    std::cout << ibead << '\n';
 
   }
+
+  delete boxCenter;
 }
