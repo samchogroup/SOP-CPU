@@ -34,7 +34,8 @@ void force_eval()
 
 }
 
-void clear_forces() {
+void clear_forces()
+{
 
   using namespace std;
 
@@ -46,7 +47,8 @@ void clear_forces() {
 
 }
 
-void set_potential() {
+void set_potential()
+{
 
   using namespace std;
 
@@ -188,10 +190,73 @@ void soft_sphere_angular_energy()
 
 }
 
-void vdw_energy()
+void vdw_bh_energy()
 {
 
   using namespace std;
+
+  int ibead,jbead;
+  int itype,jtype;
+  double dx,dy,dz,d,d2,d6,d12;
+
+  e_vdw_rr = 0.0;
+  e_vdw_rr_att = 0.0;
+  e_vdw_rr_rep = 0.0;
+  e_vdw_cc = 0.0;
+  e_vdw_rc = 0.0;
+
+  for( int i=1; i<=nil_att; i++ ) {
+
+    ibead = ibead_pair_list_att[i];
+    jbead = jbead_pair_list_att[i];
+    itype = itype_pair_list_att[i];
+    jtype = jtype_pair_list_att[i];
+
+    dx = unc_pos[jbead].x - unc_pos[ibead].x;
+    dy = unc_pos[jbead].y - unc_pos[ibead].y;
+    dz = unc_pos[jbead].z - unc_pos[ibead].z;
+
+    d2 = att_pl_bh_d2[i];
+    d6 = att_pl_bh_d6[i];
+    d12 = att_pl_bh_d12[i];
+
+    e_vdw_rr_att += coeff_att[itype][jtype] * (pl_lj_nat_pdb_dist12[i]/d12)-2.0*(pl_lj_nat_pdb_dist6[i]/d6);
+
+  }
+
+  for( int i=1; i<=nil_rep; i++ ) {
+
+    ibead = ibead_pair_list_rep[i];
+    jbead = jbead_pair_list_rep[i];
+    itype = itype_pair_list_rep[i];
+    jtype = jtype_pair_list_rep[i];
+
+    dx = unc_pos[jbead].x - unc_pos[ibead].x;
+    dy = unc_pos[jbead].y - unc_pos[ibead].y;
+    dz = unc_pos[jbead].z - unc_pos[ibead].z;
+
+    d2 = rep_pl_bh_d2[i];
+    d6 = rep_pl_bh_d6[i];
+    d12 = rep_pl_bh_d12[i];
+
+    e_vdw_rr_rep += coeff_rep[itype][jtype] * (sigma_rep12[itype][jtype]/d12+sigma_rep6[itype][jtype]/d6);
+
+  }
+
+  e_vdw_rr = e_vdw_rr_att + e_vdw_rr_rep;
+
+  return;
+
+}
+
+void vdw_energy()
+{
+  using namespace std;
+
+  if(barnes_hut){
+    vdw_bh_energy();
+    return;
+  }
 
   int ibead,jbead;
   int itype,jtype;
@@ -260,12 +325,94 @@ void vdw_energy()
 
 }
 
-void vdw_forces()
+void vdw_bh_forces()
 {
-
   using namespace std;
 
-  char line[2048];
+  int ibead,jbead;
+  int itype,jtype;
+  double dx,dy,dz,d,d2,d6,d12;
+  double fx,fy,fz;
+  double co1;
+  const static double tol = 1.0e-7;
+  double rep_tol;
+
+  for( int i=1; i<=nil_att; i++ ) {
+
+    ibead = ibead_pair_list_att[i];
+    jbead = jbead_pair_list_att[i];
+    itype = itype_pair_list_att[i];
+    jtype = jtype_pair_list_att[i];
+
+    dx = unc_pos[jbead].x - unc_pos[ibead].x;
+    dy = unc_pos[jbead].y - unc_pos[ibead].y;
+    dz = unc_pos[jbead].z - unc_pos[ibead].z;
+
+    d2 = att_pl_bh_d2[i];
+    d6 = att_pl_bh_d6[i];
+    d12 = att_pl_bh_d12[i];
+
+    rep_tol = sigma_rep2[itype][jtype]*tol;
+
+    if( d2 < tol*lj_nat_pdb_dist2[i] ) continue;
+
+    co1 = force_coeff_att[itype][jtype]/d2*((pl_lj_nat_pdb_dist12[i]/d12)-(pl_lj_nat_pdb_dist6[i]/d6));
+
+    fx = co1*dx;
+    fy = co1*dy;
+    fz = co1*dz;
+
+    force[ibead].x += fx;
+    force[ibead].y += fy;
+    force[ibead].z += fz;
+
+    force[jbead].x -= fx;
+    force[jbead].y -= fy;
+    force[jbead].z -= fz;
+  }
+
+  for( int i=1; i<=nil_rep; i++ ) {
+
+    ibead = ibead_pair_list_rep[i];
+    jbead = jbead_pair_list_rep[i];
+    itype = itype_pair_list_rep[i];
+    jtype = jtype_pair_list_rep[i];
+
+    dx = unc_pos[jbead].x - unc_pos[ibead].x;
+    dy = unc_pos[jbead].y - unc_pos[ibead].y;
+    dz = unc_pos[jbead].z - unc_pos[ibead].z;
+
+    d2 = rep_pl_bh_d2[i];
+    d6 = rep_pl_bh_d6[i];
+    d12 = rep_pl_bh_d12[i];
+
+    if( d2 <  rep_tol ) continue;
+
+    co1 = force_coeff_rep[itype][jtype]/d2*
+      (2.0*sigma_rep12[itype][jtype]/d12+sigma_rep6[itype][jtype]/d6);
+
+    fx = co1*dx;
+    fy = co1*dy;
+    fz = co1*dz;
+
+    force[ibead].x += fx;
+    force[ibead].y += fy;
+    force[ibead].z += fz;
+
+    force[jbead].x -= fx;
+    force[jbead].y -= fy;
+    force[jbead].z -= fz;
+  }
+}
+
+void vdw_forces()
+{
+  using namespace std;
+
+  if(barnes_hut){
+    vdw_bh_forces();
+    return;
+  }
 
   int ibead,jbead;
   int itype,jtype;

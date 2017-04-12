@@ -134,9 +134,12 @@ extern double* aux_tree_d6;
 extern double* aux_tree_d12;
 extern coord* octet_center_mass;
 extern int* octet_count_bhtree;
-extern double* pl_bh_d2;
-extern double* pl_bh_d6;
-extern double* pl_bh_d12;
+extern double* att_pl_bh_d2;
+extern double* att_pl_bh_d6;
+extern double* att_pl_bh_d12;
+extern double* rep_pl_bh_d2;
+extern double* rep_pl_bh_d6;
+extern double* rep_pl_bh_d12;
 
 // coordinates and associated params
 extern int nbead;

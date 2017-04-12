@@ -226,9 +226,9 @@ void bh_update_pair_list(){
     pl_lj_nat_pdb_dist6[nil_att] = lj_nat_pdb_dist6[i];
     pl_lj_nat_pdb_dist12[nil_att] = lj_nat_pdb_dist12[i];
 
-    pl_bh_d2[nil_att] = aux_tree_d2[index];
-    pl_bh_d6[nil_att] = aux_tree_d6[index];
-    pl_bh_d12[nil_att] = aux_tree_d12[index];
+    att_pl_bh_d2[nil_att] = aux_tree_d2[index];
+    att_pl_bh_d6[nil_att] = aux_tree_d6[index];
+    att_pl_bh_d12[nil_att] = aux_tree_d12[index];
   }
 
   /* aux tree reset for repulsive pair list */
@@ -256,9 +256,9 @@ void bh_update_pair_list(){
     itype_pair_list_rep[nil_rep] = itype;
     jtype_pair_list_rep[nil_rep] = jtype;
 
-    pl_bh_d2[nil_rep] = aux_tree_d2[index];
-    pl_bh_d6[nil_rep] = aux_tree_d6[index];
-    pl_bh_d12[nil_rep] = aux_tree_d12[index];
+    rep_pl_bh_d2[nil_rep] = aux_tree_d2[index];
+    rep_pl_bh_d6[nil_rep] = aux_tree_d6[index];
+    rep_pl_bh_d12[nil_rep] = aux_tree_d12[index];
   }
 
   delete boxCenter;

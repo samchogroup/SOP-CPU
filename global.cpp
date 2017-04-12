@@ -154,9 +154,12 @@ double* aux_tree_d12;
 int* indices_bhtree;
 coord* octet_center_mass;
 int* octet_count_bhtree;
-double* pl_bh_d2;
-double* pl_bh_d6;
-double* pl_bh_d12;
+double* att_pl_bh_d2;
+double* att_pl_bh_d6;
+double* att_pl_bh_d12;
+double* rep_pl_bh_d2;
+double* rep_pl_bh_d6;
+double* rep_pl_bh_d12;
 
 
 // coordinates and associated params
