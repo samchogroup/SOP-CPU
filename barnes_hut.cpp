@@ -109,6 +109,7 @@ double set_initial_width(){
 }
 
 void build_bh_tree(){
+  std::cout << "rebuilding tree" << '\n';
   std::fill_n(indices_bhtree, 16*nbead, empty_cell);
   int tree_index = 0; // all insertions start in the root of the tree
   set_initial_width();
@@ -142,9 +143,13 @@ int distance_index(int tree_index, int ibead, int jbead, coord *boxCenter, doubl
     dy -= boxl*rnd(dy/boxl);
     dz -= boxl*rnd(dz/boxl);
 
-    aux_tree_d2[tree_index] = dx*dx+dy*dy+dz*dz;
-    aux_tree_d6[tree_index] = d2*d2*d2;
-    aux_tree_d12[tree_index] = d6*d6;
+    d2 = dx*dx+dy*dy+dz*dz;
+    d6 = d2*d2*d2;
+    d12 = d6*d6;
+
+    aux_tree_d2[tree_index] = d2;
+    aux_tree_d6[tree_index] = d6;
+    aux_tree_d12[tree_index] = d12;
 
     return tree_index;
 
@@ -170,9 +175,11 @@ int distance_index(int tree_index, int ibead, int jbead, coord *boxCenter, doubl
 
     if(s2/d2 < theta2){
       /* cell is far enough to use this distance for calculations */
+      d6 = d2*d2*d2;
+      d12 = d6*d6;
       aux_tree_d2[tree_index] = d2;
-      aux_tree_d6[tree_index] = d2*d2*d2;
-      aux_tree_d12[tree_index] = d6*d6;
+      aux_tree_d6[tree_index] = d6;
+      aux_tree_d12[tree_index] = d12;
 
       return tree_index;
 
@@ -258,6 +265,7 @@ void bh_update_pair_list(){
     rep_pl_bh_d2[nil_rep] = aux_tree_d2[index];
     rep_pl_bh_d6[nil_rep] = aux_tree_d6[index];
     rep_pl_bh_d12[nil_rep] = aux_tree_d12[index];
+
   }
 
   delete boxCenter;

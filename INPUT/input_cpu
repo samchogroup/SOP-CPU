@@ -3,7 +3,7 @@ set temp 0.60;
 set run 2718;
 set restart off;
 set istep_restart 0.0;
-set nstep 100;
+set nstep 1;
 set nup 1;
 set zeta 5e-2;
 set boxl 750.0;

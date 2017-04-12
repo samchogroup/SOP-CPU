@@ -216,9 +216,15 @@ void vdw_bh_energy()
     dy = unc_pos[jbead].y - unc_pos[ibead].y;
     dz = unc_pos[jbead].z - unc_pos[ibead].z;
 
+    dx -= boxl*rnd(dx/boxl);
+    dy -= boxl*rnd(dy/boxl);
+    dz -= boxl*rnd(dz/boxl);
+
     d2 = att_pl_bh_d2[i];
     d6 = att_pl_bh_d6[i];
     d12 = att_pl_bh_d12[i];
+
+    // std::cout << d6 << '\n';
 
     e_vdw_rr_att += coeff_att[itype][jtype] * (pl_lj_nat_pdb_dist12[i]/d12)-2.0*(pl_lj_nat_pdb_dist6[i]/d6);
 
@@ -235,15 +241,19 @@ void vdw_bh_energy()
     dy = unc_pos[jbead].y - unc_pos[ibead].y;
     dz = unc_pos[jbead].z - unc_pos[ibead].z;
 
+    dx -= boxl*rnd(dx/boxl);
+    dy -= boxl*rnd(dy/boxl);
+    dz -= boxl*rnd(dz/boxl);
+
     d2 = rep_pl_bh_d2[i];
     d6 = rep_pl_bh_d6[i];
     d12 = rep_pl_bh_d12[i];
 
     e_vdw_rr_rep += coeff_rep[itype][jtype] * (sigma_rep12[itype][jtype]/d12+sigma_rep6[itype][jtype]/d6);
-
   }
 
   e_vdw_rr = e_vdw_rr_att + e_vdw_rr_rep;
+  std::cout << " EEEEEEE" << e_vdw_rr << '\n';
 
   return;
 
@@ -253,10 +263,10 @@ void vdw_energy()
 {
   using namespace std;
 
-  // if(barnesHut){
-  //   vdw_bh_energy();
-  //   return;
-  // }
+  if(barnesHut){
+    vdw_bh_energy();
+    return;
+  }
 
   int ibead,jbead;
   int itype,jtype;
@@ -290,6 +300,8 @@ void vdw_energy()
     d6 = d2*d2*d2;
     d12 = d6*d6;
 
+    std::cout << d6 << '\n';
+
     e_vdw_rr_att += coeff_att[itype][jtype] * (pl_lj_nat_pdb_dist12[i]/d12)-2.0*(pl_lj_nat_pdb_dist6[i]/d6);
 
   }
@@ -321,6 +333,8 @@ void vdw_energy()
 
   e_vdw_rr = e_vdw_rr_att + e_vdw_rr_rep;
 
+  std::cout << " AAAAAAAA" << e_vdw_rr << '\n';
+
   return;
 
 }
@@ -347,6 +361,10 @@ void vdw_bh_forces()
     dx = unc_pos[jbead].x - unc_pos[ibead].x;
     dy = unc_pos[jbead].y - unc_pos[ibead].y;
     dz = unc_pos[jbead].z - unc_pos[ibead].z;
+
+    dx -= boxl*rnd(dx/boxl);
+    dy -= boxl*rnd(dy/boxl);
+    dz -= boxl*rnd(dz/boxl);
 
     d2 = att_pl_bh_d2[i];
     d6 = att_pl_bh_d6[i];
@@ -382,6 +400,10 @@ void vdw_bh_forces()
     dy = unc_pos[jbead].y - unc_pos[ibead].y;
     dz = unc_pos[jbead].z - unc_pos[ibead].z;
 
+    dx -= boxl*rnd(dx/boxl);
+    dy -= boxl*rnd(dy/boxl);
+    dz -= boxl*rnd(dz/boxl);
+
     d2 = rep_pl_bh_d2[i];
     d6 = rep_pl_bh_d6[i];
     d12 = rep_pl_bh_d12[i];
@@ -409,10 +431,10 @@ void vdw_forces()
 {
   using namespace std;
 
-  // if(barnesHut){
-  //   vdw_bh_forces();
-  //   return;
-  // }
+  if(barnesHut){
+    vdw_bh_forces();
+    return;
+  }
 
   int ibead,jbead;
   int itype,jtype;
