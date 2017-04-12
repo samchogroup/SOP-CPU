@@ -114,22 +114,17 @@ void underdamped_ctrl()
     }
   }
   print_sim_params();
-  std::cout << nnl_rep << '\n';
 
   if (neighborlist == 1) {
-    std::cout << nnl_rep << '\n';
     update_neighbor_list();
     update_pair_list();
   } else if (celllist == 1) {
-    std::cout << nnl_rep << '\n';
     update_cell_list();
     update_pair_list();
   } else if (barnesHut == 1){
-    std::cout << nnl_rep << '\n';
     build_bh_tree();
     bh_update_pair_list();
   }
-  std::cout << nnl_rep << '\n';
 
   set_potential();
   set_forces();
@@ -494,6 +489,7 @@ void update_pair_list() {
   // declare device variables
 
   // should be native distance
+
   for (int i=1; i<=nnl_att; i++) {
 
     ibead = ibead_neighbor_list_att[i];
@@ -526,7 +522,6 @@ void update_pair_list() {
       pl_lj_nat_pdb_dist6[nil_att] = nl_lj_nat_pdb_dist6[i];
       pl_lj_nat_pdb_dist12[nil_att] = nl_lj_nat_pdb_dist12[i];
     }
-
   }
 
   for (int i=1; i<=nnl_rep; i++) {

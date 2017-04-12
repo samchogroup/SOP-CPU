@@ -1,5 +1,7 @@
 #include <cstdlib>
 #include <math.h>
+#include <iostream>
+#include <cstdio>
 #include "global.h"
 #include "energy.h"
 

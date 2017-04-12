@@ -404,6 +404,9 @@ void alloc_arrays()
   aux_tree_d6 = new double[16*nbead]();
   aux_tree_d12 = new double[16*nbead]();
   octet_center_mass = new coord[16*nbead];
+  pl_bh_d2 = new double[16*nbead]();
+  pl_bh_d6 = new double[16*nbead]();
+  pl_bh_d12 = new double[16*nbead]();
 }
 
 void release_bonds()
