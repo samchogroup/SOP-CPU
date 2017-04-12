@@ -253,10 +253,10 @@ void vdw_energy()
 {
   using namespace std;
 
-  if(barnes_hut){
-    vdw_bh_energy();
-    return;
-  }
+  // if(barnesHut){
+  //   vdw_bh_energy();
+  //   return;
+  // }
 
   int ibead,jbead;
   int itype,jtype;
@@ -409,10 +409,10 @@ void vdw_forces()
 {
   using namespace std;
 
-  if(barnes_hut){
-    vdw_bh_forces();
-    return;
-  }
+  // if(barnesHut){
+  //   vdw_bh_forces();
+  //   return;
+  // }
 
   int ibead,jbead;
   int itype,jtype;

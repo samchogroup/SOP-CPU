@@ -347,10 +347,16 @@ void alloc_arrays()
   pl_lj_nat_pdb_dist2 = new double[ncon_att+1];
   pl_lj_nat_pdb_dist6 = new double[ncon_att+1];
   pl_lj_nat_pdb_dist12 = new double[ncon_att+1];
+  att_pl_bh_d2 = new double[ncon_att+1];
+  att_pl_bh_d6 = new double[ncon_att+1];
+  att_pl_bh_d12 = new double[ncon_att+1];
   ibead_pair_list_rep = new int[ncon_rep+1];
   jbead_pair_list_rep = new int[ncon_rep+1];
   itype_pair_list_rep = new int[ncon_rep+1];
   jtype_pair_list_rep = new int[ncon_rep+1];
+  rep_pl_bh_d2 = new double[ncon_rep+1];
+  rep_pl_bh_d6 = new double[ncon_rep+1];
+  rep_pl_bh_d12 = new double[ncon_rep+1];
 
   lj_rna_rna_allocated = 1;
 
@@ -405,12 +411,6 @@ void alloc_arrays()
   aux_tree_d12 = new double[16*nbead]();
   octet_center_mass = new coord[16*nbead];
   octet_count_bhtree = new int[16*nbead]();
-  double* att_pl_bh_d2 = new double[16*nbead]();
-  double* att_pl_bh_d6 = new double[16*nbead]();
-  double* att_pl_bh_d12 = new double[16*nbead]();
-  double* rep_pl_bh_d2 = new double[16*nbead]();
-  double* rep_pl_bh_d6 = new double[16*nbead]();
-  double* rep_pl_bh_d12 = new double[16*nbead]();
 }
 
 void release_bonds()
@@ -498,10 +498,16 @@ void release_lj()
   delete [] pl_lj_nat_pdb_dist2;
   delete [] pl_lj_nat_pdb_dist6;
   delete [] pl_lj_nat_pdb_dist12;
+  delete [] att_pl_bh_d2;
+  delete [] att_pl_bh_d6;
+  delete [] att_pl_bh_d12;
   delete [] ibead_pair_list_rep;
   delete [] jbead_pair_list_rep;
   delete [] itype_pair_list_rep;
   delete [] jtype_pair_list_rep;
+  delete [] rep_pl_bh_d2;
+  delete [] rep_pl_bh_d6;
+  delete [] rep_pl_bh_d12;
 
   lj_rna_rna_allocated = 0;
 
@@ -547,10 +553,16 @@ void init_lj(int numatt, int numrep )
   pl_lj_nat_pdb_dist2 = new double[numatt+1];
   pl_lj_nat_pdb_dist6 = new double[numatt+1];
   pl_lj_nat_pdb_dist12 = new double[numatt+1];
+  att_pl_bh_d2 = new double[numatt+1];
+  att_pl_bh_d6 = new double[numatt+1];
+  att_pl_bh_d12 = new double[numatt+1];
   ibead_pair_list_rep = new int[numrep+1];
   jbead_pair_list_rep = new int[numrep+1];
   itype_pair_list_rep = new int[numrep+1];
   jtype_pair_list_rep = new int[numrep+1];
+  rep_pl_bh_d2 = new double[numrep+1];
+  rep_pl_bh_d6 = new double[numrep+1];
+  rep_pl_bh_d12 = new double[numrep+1];
 
   lj_rna_rna_allocated = 1;
 

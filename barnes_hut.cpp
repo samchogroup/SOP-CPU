@@ -202,7 +202,6 @@ void bh_update_pair_list(){
   /* attractive interactions */
 
   for (int i=1; i<=ncon_att; i++) {
-
     if (ibead != ibead_lj_nat[i]) {
       /* the group of interactions ibead-x is done, aux tree with distances is zeroed out */
       std::fill_n(aux_tree_d2, 16*nbead, empty_cell);
