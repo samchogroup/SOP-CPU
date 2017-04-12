@@ -224,8 +224,6 @@ void vdw_bh_energy()
     d6 = att_pl_bh_d6[i];
     d12 = att_pl_bh_d12[i];
 
-    // std::cout << d6 << '\n';
-
     e_vdw_rr_att += coeff_att[itype][jtype] * (pl_lj_nat_pdb_dist12[i]/d12)-2.0*(pl_lj_nat_pdb_dist6[i]/d6);
 
   }
@@ -253,7 +251,6 @@ void vdw_bh_energy()
   }
 
   e_vdw_rr = e_vdw_rr_att + e_vdw_rr_rep;
-  std::cout << " EEEEEEE" << e_vdw_rr << '\n';
 
   return;
 
@@ -300,8 +297,6 @@ void vdw_energy()
     d6 = d2*d2*d2;
     d12 = d6*d6;
 
-    std::cout << d6 << '\n';
-
     e_vdw_rr_att += coeff_att[itype][jtype] * (pl_lj_nat_pdb_dist12[i]/d12)-2.0*(pl_lj_nat_pdb_dist6[i]/d6);
 
   }
@@ -332,8 +327,6 @@ void vdw_energy()
   }
 
   e_vdw_rr = e_vdw_rr_att + e_vdw_rr_rep;
-
-  std::cout << " AAAAAAAA" << e_vdw_rr << '\n';
 
   return;
 
@@ -619,7 +612,8 @@ void fene_forces()
 
 }
 
-void random_force() {
+void random_force()
+{
 
   using namespace std;
 
