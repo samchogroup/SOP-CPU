@@ -253,7 +253,6 @@ void vdw_bh_energy()
   }
 
   e_vdw_rr = e_vdw_rr_att + e_vdw_rr_rep;
-  std::cout << " EEEEEEE" << e_vdw_rr << '\n';
 
   return;
 

@@ -109,11 +109,12 @@ double set_initial_width(){
 }
 
 void build_bh_tree(){
-  std::cout << "rebuilding tree" << '\n';
+  /* reset tree */
   std::fill_n(indices_bhtree, 16*nbead, empty_cell);
-  int tree_index = 0; // all insertions start in the root of the tree
+  next_tree_index = 0;
+  int tree_index = 0;
   set_initial_width();
-  coord *boxCenter = new coord(); // initial box center coordinate - 0, 0, 0
+  coord *boxCenter = new coord();
   boxCenter->x = 0.0;
   boxCenter->y = 0.0;
   boxCenter->z = 0.0;
@@ -126,13 +127,31 @@ void build_bh_tree(){
 }
 
 int distance_index(int tree_index, int ibead, int jbead, coord *boxCenter, double width){
+  std::cout << tree_index << " " << '\n';
 
   double dx, dy, dz;
   double d2, d6, d12;
 
-  if (indices_bhtree[tree_index] < 0) {  /* leaf found, calculate distance and return */
+  if (indices_bhtree[tree_index] == empty_cell){
+    if (jbead != -indices_bhtree[tree_index]) {
+      std::cout << "ERROR, the search went wrong, reached empty cell " << jbead << " " << indices_bhtree[tree_index] << '\n';
+      unc_pos[jbead].print(); std::cout << '\n';
+      // std::cout << "printing tree: " << '\n';
+      // for (int i = 0; i < next_tree_index; i++) {
+      //   std::cout << indices_bhtree[i] << '\n';
+      //   if (-indices_bhtree[i] == jbead) {
+      //     // unc_pos[jbead]
+      //     break;
+      //   }
+      // }
+      std::cout << '\n';
+      std::cin.get();
+    }
+
+  } else if (indices_bhtree[tree_index] < empty_cell) {  /* leaf found, calculate distance and return */
     if (jbead != -indices_bhtree[tree_index]) {
       std::cout << "ERROR, the search went wrong! " << jbead << " " << indices_bhtree[tree_index] << '\n';
+      std::cin.get();
     }
 
     dx = unc_pos[jbead].x - unc_pos[ibead].x;
@@ -220,6 +239,8 @@ void bh_update_pair_list(){
     jtype = jtype_lj_nat[i];
 
     int index = distance_index(0, ibead, jbead, boxCenter, rootWidth);
+
+    std::cout << "-----------------------------------------------------------------------" << '\n';
 
     //rcut?
     nil_att++;
