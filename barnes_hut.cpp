@@ -19,7 +19,6 @@ coord * find_subtree_coord(double width, coord *center, int bead_index){
   double half = width/2.0;
   coord * subtree = new coord();
 
-  // Does not handle coordinates outside the box space
   subtree->x = unc_pos[bead_index].x > center->x - half && unc_pos[bead_index].x < center->x ? 0 : 1;
   subtree->y = unc_pos[bead_index].y > center->y - half && unc_pos[bead_index].y < center->y ? 0 : 1;
   subtree->z = unc_pos[bead_index].z > center->z - half && unc_pos[bead_index].z < center->z ? 0 : 1;
@@ -53,9 +52,12 @@ coord * get_udpated_center(coord *boxCenter, coord* subtree, double width){
   tree_index = index of the current subtree in the flattened array structures
   bead_index = index of the bead in the list of bead data
   box_center = tridimensional coordinate that marks the center of the box associated to the subtree
-  width = widht of the box associated with the subtree
+  width = width of the box associated with the subtree
 */
 void insert_bead_bhtree(int tree_index, int bead_index, coord *boxCenter, double width){
+  if (bead_index == 7) {
+    std::cout << tree_index << " ";
+  }
   if (indices_bhtree[tree_index] == empty_cell){
     /* Inseart bead with negative index */
     indices_bhtree[tree_index] = -bead_index;
@@ -96,11 +98,11 @@ void insert_bead_bhtree(int tree_index, int bead_index, coord *boxCenter, double
 
 double set_initial_width(){
   double width = 0.0;
-  float x,y,z;
-  for (int i = 0; i < nbead; i++) {
-    x = abs(unc_pos[i].x);
-    y = abs(unc_pos[i].y);
-    z = abs(unc_pos[i].z);
+  double x,y,z;
+  for (int i = 0; i <= nbead; i++) {
+    x = fabs(unc_pos[i].x);
+    y = fabs(unc_pos[i].y);
+    z = fabs(unc_pos[i].z);
     width = x > width ? x : width;
     width = y > width ? y : width;
     width = z > width ? z : width;
@@ -110,6 +112,7 @@ double set_initial_width(){
 
 void build_bh_tree(){
   /* reset tree */
+  std::cout << "\nbuilding tree..." << '\n';
   std::fill_n(indices_bhtree, 16*nbead, empty_cell);
   next_tree_index = 0;
   int tree_index = 0;
@@ -127,23 +130,26 @@ void build_bh_tree(){
 }
 
 int distance_index(int tree_index, int ibead, int jbead, coord *boxCenter, double width){
-  std::cout << tree_index << " " << '\n';
+  // std::cout << tree_index << " " << '\n';
 
   double dx, dy, dz;
   double d2, d6, d12;
 
+  if (jbead == 7) {
+    std::cout << tree_index << " ";
+  }
+
   if (indices_bhtree[tree_index] == empty_cell){
     if (jbead != -indices_bhtree[tree_index]) {
       std::cout << "ERROR, the search went wrong, reached empty cell " << jbead << " " << indices_bhtree[tree_index] << '\n';
+      std::cout << "Current tree index: " << tree_index << " width: " << width << '\n';
       unc_pos[jbead].print(); std::cout << '\n';
-      // std::cout << "printing tree: " << '\n';
-      // for (int i = 0; i < next_tree_index; i++) {
-      //   std::cout << indices_bhtree[i] << '\n';
-      //   if (-indices_bhtree[i] == jbead) {
-      //     // unc_pos[jbead]
-      //     break;
-      //   }
-      // }
+      std::cout << "print neighboring beads" << '\n';
+      for (int i = tree_index - 8; i < tree_index + 8; i++) {
+        if (indices_bhtree[i] < 0) {
+          unc_pos[indices_bhtree[i]].print();
+        }
+      }
       std::cout << '\n';
       std::cin.get();
     }
@@ -215,6 +221,7 @@ int distance_index(int tree_index, int ibead, int jbead, coord *boxCenter, doubl
 }
 
 void bh_update_pair_list(){
+  std::cout << "\nupdating pair list" << '\n';
   std::fill_n(aux_tree_d2, 16*nbead, empty_cell);
   nil_att = 0;
   nil_rep = 0;
@@ -239,8 +246,11 @@ void bh_update_pair_list(){
     jtype = jtype_lj_nat[i];
 
     int index = distance_index(0, ibead, jbead, boxCenter, rootWidth);
+    if (jbead == 7) {
+      unc_pos[jbead].print();
+      std::cout << '\n';
+    }
 
-    std::cout << "-----------------------------------------------------------------------" << '\n';
 
     //rcut?
     nil_att++;

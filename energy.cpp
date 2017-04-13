@@ -260,10 +260,10 @@ void vdw_energy()
 {
   using namespace std;
 
-  if(barnesHut){
-    vdw_bh_energy();
-    return;
-  }
+  // if(barnesHut){
+  //   vdw_bh_energy();
+  //   return;
+  // }
 
   int ibead,jbead;
   int itype,jtype;
