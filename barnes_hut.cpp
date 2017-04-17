@@ -16,12 +16,11 @@ int get_next_tree_index(){
 }
 
 coord * find_subtree_coord(double width, coord *center, int bead_index){
-  double half = width/2.0;
   coord * subtree = new coord();
 
-  subtree->x = unc_pos[bead_index].x > center->x - half && unc_pos[bead_index].x < center->x ? 0 : 1;
-  subtree->y = unc_pos[bead_index].y > center->y - half && unc_pos[bead_index].y < center->y ? 0 : 1;
-  subtree->z = unc_pos[bead_index].z > center->z - half && unc_pos[bead_index].z < center->z ? 0 : 1;
+  subtree->x = unc_pos[bead_index].x < center->x ? 0 : 1;
+  subtree->y = unc_pos[bead_index].y < center->y ? 0 : 1;
+  subtree->z = unc_pos[bead_index].z < center->z ? 0 : 1;
 
   return subtree;
 }
@@ -55,9 +54,6 @@ coord * get_udpated_center(coord *boxCenter, coord* subtree, double width){
   width = width of the box associated with the subtree
 */
 void insert_bead_bhtree(int tree_index, int bead_index, coord *boxCenter, double width){
-  if (bead_index == 7) {
-    std::cout << tree_index << " ";
-  }
   if (indices_bhtree[tree_index] == empty_cell){
     /* Inseart bead with negative index */
     indices_bhtree[tree_index] = -bead_index;
@@ -112,7 +108,6 @@ double set_initial_width(){
 
 void build_bh_tree(){
   /* reset tree */
-  std::cout << "\nbuilding tree..." << '\n';
   std::fill_n(indices_bhtree, 16*nbead, empty_cell);
   next_tree_index = 0;
   int tree_index = 0;
@@ -130,34 +125,23 @@ void build_bh_tree(){
 }
 
 int distance_index(int tree_index, int ibead, int jbead, coord *boxCenter, double width){
-  // std::cout << tree_index << " " << '\n';
 
   double dx, dy, dz;
   double d2, d6, d12;
 
-  if (jbead == 7) {
-    std::cout << tree_index << " ";
-  }
-
   if (indices_bhtree[tree_index] == empty_cell){
     if (jbead != -indices_bhtree[tree_index]) {
-      std::cout << "ERROR, the search went wrong, reached empty cell " << jbead << " " << indices_bhtree[tree_index] << '\n';
-      std::cout << "Current tree index: " << tree_index << " width: " << width << '\n';
-      unc_pos[jbead].print(); std::cout << '\n';
-      std::cout << "print neighboring beads" << '\n';
-      for (int i = tree_index - 8; i < tree_index + 8; i++) {
-        if (indices_bhtree[i] < 0) {
-          unc_pos[indices_bhtree[i]].print();
-        }
-      }
-      std::cout << '\n';
-      std::cin.get();
+      /* bead moved out of cell and is to be reinserted in current empty cell */
+      indices_bhtree[tree_index] = -jbead;
+      reinserted++;
     }
+  }
 
-  } else if (indices_bhtree[tree_index] < empty_cell) {  /* leaf found, calculate distance and return */
+ if (indices_bhtree[tree_index] < empty_cell) {  /* leaf found, calculate distance and return */
     if (jbead != -indices_bhtree[tree_index]) {
-      std::cout << "ERROR, the search went wrong! " << jbead << " " << indices_bhtree[tree_index] << '\n';
-      std::cin.get();
+      /* bead moved out of cell and is to be reinserted in current subtree*/
+      insert_bead_bhtree(tree_index, jbead, boxCenter, width);
+      reinserted++;
     }
 
     dx = unc_pos[jbead].x - unc_pos[ibead].x;
@@ -176,12 +160,15 @@ int distance_index(int tree_index, int ibead, int jbead, coord *boxCenter, doubl
     aux_tree_d6[tree_index] = d6;
     aux_tree_d12[tree_index] = d12;
 
+    individual++;
+
     return tree_index;
 
   } else {  /* internal node (cell) found */
 
     if (aux_tree_d2[tree_index] != 0) {
       /* already calculated */
+      approximated++;
       return tree_index;
     }
 
@@ -206,6 +193,7 @@ int distance_index(int tree_index, int ibead, int jbead, coord *boxCenter, doubl
       aux_tree_d6[tree_index] = d6;
       aux_tree_d12[tree_index] = d12;
 
+      approximated++;
       return tree_index;
 
     } else {
@@ -221,7 +209,6 @@ int distance_index(int tree_index, int ibead, int jbead, coord *boxCenter, doubl
 }
 
 void bh_update_pair_list(){
-  std::cout << "\nupdating pair list" << '\n';
   std::fill_n(aux_tree_d2, 16*nbead, empty_cell);
   nil_att = 0;
   nil_rep = 0;
@@ -246,11 +233,6 @@ void bh_update_pair_list(){
     jtype = jtype_lj_nat[i];
 
     int index = distance_index(0, ibead, jbead, boxCenter, rootWidth);
-    if (jbead == 7) {
-      unc_pos[jbead].print();
-      std::cout << '\n';
-    }
-
 
     //rcut?
     nil_att++;

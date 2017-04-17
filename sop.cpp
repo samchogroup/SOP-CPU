@@ -49,6 +49,10 @@ int main(int argc,char* argv[])
   cout << "Computation Rate       : " << float(ck1-ck0)/CLOCKS_PER_SEC/nstep << " sec / timestep" << endl;
   cout << "CURRENT TIME IS        : " << ctime(&tm1);
 
+  if (barnesHut) {
+    std::cout << "Calculated: " << individual << " Reinserted: " << reinserted << " Approximated: " << approximated << '\n';
+  }
+
   return 0;
 
 }

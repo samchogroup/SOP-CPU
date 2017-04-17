@@ -160,6 +160,9 @@ double* att_pl_bh_d12;
 double* rep_pl_bh_d2;
 double* rep_pl_bh_d6;
 double* rep_pl_bh_d12;
+int individual = 0;
+int reinserted = 0;
+int approximated = 0;
 
 
 // coordinates and associated params

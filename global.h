@@ -140,6 +140,9 @@ extern double* att_pl_bh_d12;
 extern double* rep_pl_bh_d2;
 extern double* rep_pl_bh_d6;
 extern double* rep_pl_bh_d12;
+extern int individual;
+extern int reinserted;
+extern int approximated;
 
 // coordinates and associated params
 extern int nbead;
