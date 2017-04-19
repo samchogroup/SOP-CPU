@@ -197,7 +197,7 @@ void vdw_bh_energy()
 
   int ibead,jbead;
   int itype,jtype;
-  double dx,dy,dz,d,d2,d6,d12;
+  double d,d2,d6,d12;
 
   e_vdw_rr = 0.0;
   e_vdw_rr_att = 0.0;
@@ -211,14 +211,6 @@ void vdw_bh_energy()
     jbead = jbead_pair_list_att[i];
     itype = itype_pair_list_att[i];
     jtype = jtype_pair_list_att[i];
-
-    dx = unc_pos[jbead].x - unc_pos[ibead].x;
-    dy = unc_pos[jbead].y - unc_pos[ibead].y;
-    dz = unc_pos[jbead].z - unc_pos[ibead].z;
-
-    dx -= boxl*rnd(dx/boxl);
-    dy -= boxl*rnd(dy/boxl);
-    dz -= boxl*rnd(dz/boxl);
 
     d2 = att_pl_bh_d2[i];
     d6 = att_pl_bh_d6[i];
@@ -234,14 +226,6 @@ void vdw_bh_energy()
     jbead = jbead_pair_list_rep[i];
     itype = itype_pair_list_rep[i];
     jtype = jtype_pair_list_rep[i];
-
-    dx = unc_pos[jbead].x - unc_pos[ibead].x;
-    dy = unc_pos[jbead].y - unc_pos[ibead].y;
-    dz = unc_pos[jbead].z - unc_pos[ibead].z;
-
-    dx -= boxl*rnd(dx/boxl);
-    dy -= boxl*rnd(dy/boxl);
-    dz -= boxl*rnd(dz/boxl);
 
     d2 = rep_pl_bh_d2[i];
     d6 = rep_pl_bh_d6[i];
@@ -260,10 +244,10 @@ void vdw_energy()
 {
   using namespace std;
 
-  // if(barnesHut){
-  //   vdw_bh_energy();
-  //   return;
-  // }
+  if(barnesHut){
+    vdw_bh_energy();
+    return;
+  }
 
   int ibead,jbead;
   int itype,jtype;
@@ -286,8 +270,6 @@ void vdw_energy()
     dx = unc_pos[jbead].x - unc_pos[ibead].x;
     dy = unc_pos[jbead].y - unc_pos[ibead].y;
     dz = unc_pos[jbead].z - unc_pos[ibead].z;
-
-    // min images
 
     dx -= boxl*rnd(dx/boxl);
     dy -= boxl*rnd(dy/boxl);
@@ -360,12 +342,11 @@ void vdw_bh_forces()
     dz -= boxl*rnd(dz/boxl);
 
     d2 = att_pl_bh_d2[i];
+    rep_tol = sigma_rep2[itype][jtype]*tol;
+    if( d2 < tol*lj_nat_pdb_dist2[i] ) continue;
     d6 = att_pl_bh_d6[i];
     d12 = att_pl_bh_d12[i];
 
-    rep_tol = sigma_rep2[itype][jtype]*tol;
-
-    if( d2 < tol*lj_nat_pdb_dist2[i] ) continue;
 
     co1 = force_coeff_att[itype][jtype]/d2*((pl_lj_nat_pdb_dist12[i]/d12)-(pl_lj_nat_pdb_dist6[i]/d6));
 
@@ -398,10 +379,9 @@ void vdw_bh_forces()
     dz -= boxl*rnd(dz/boxl);
 
     d2 = rep_pl_bh_d2[i];
+    if( d2 <  rep_tol ) continue;
     d6 = rep_pl_bh_d6[i];
     d12 = rep_pl_bh_d12[i];
-
-    if( d2 <  rep_tol ) continue;
 
     co1 = force_coeff_rep[itype][jtype]/d2*
       (2.0*sigma_rep12[itype][jtype]/d12+sigma_rep6[itype][jtype]/d6);
@@ -417,6 +397,7 @@ void vdw_bh_forces()
     force[jbead].x -= fx;
     force[jbead].y -= fy;
     force[jbead].z -= fz;
+
   }
 }
 
@@ -436,6 +417,7 @@ void vdw_forces()
   double co1;
   const static double tol = 1.0e-7;
   double rep_tol;
+
 
   for( int i=1; i<=nil_att; i++ ) {
 

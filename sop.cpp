@@ -154,6 +154,7 @@ void underdamped_ctrl()
     if( (first_time)&&(!rgen_restart) ) {
       record_traj(binfname,uncbinfname);
     }
+
     while( istep <= nstep ) {
 
       // compute pair separation list
@@ -173,11 +174,10 @@ void underdamped_ctrl()
       if (neighborlist == 1 || celllist == 1) {
         update_pair_list();
         //	fprintf(stderr, "(%.0lf) pair list: (%d/%d)\n", istep, nil_att, nil_rep);
-      } if (barnesHut == 1) {
-        bh_update_pair_list();
       }
 
       underdamped_iteration(incr);
+
       if( !(iup%nup) ) { // updates
 	      energy_eval();
 	      calculate_observables(incr);
@@ -318,6 +318,10 @@ void underdamped_iteration(coord* incr)
   }
 
   // force_update
+
+  if (barnesHut == 1) {
+    bh_update_pair_list();
+  }
 
   force_eval();
 
