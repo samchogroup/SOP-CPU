@@ -47,12 +47,6 @@ coord * get_udpated_center(coord *boxCenter, coord* subtree, double width){
   return newCenter;
 }
 
-/*
-  tree_index = index of the current subtree in the flattened array structures
-  bead_index = index of the bead in the list of bead data
-  box_center = tridimensional coordinate that marks the center of the box associated to the subtree
-  width = width of the box associated with the subtree
-*/
 void insert_bead_bhtree(int tree_index, int bead_index, coord *boxCenter, double width){
   if (indices_bhtree[tree_index] == empty_cell){
     /* Inseart bead with negative index */
@@ -107,6 +101,7 @@ double set_initial_width(){
 }
 
 void build_bh_tree(){
+  reinserted++;
   /* reset tree */
   std::fill_n(indices_bhtree, 16*nbead, empty_cell);
   next_tree_index = 0;
@@ -121,89 +116,108 @@ void build_bh_tree(){
     insert_bead_bhtree(tree_index, i, boxCenter, rootWidth);
   }
 
+  rebuild = 0;
   delete boxCenter;
 }
 
-int distance_index(int tree_index, int ibead, int jbead, coord *boxCenter, double width){
+coord * calculateDistances(double d2){
+  coord * distances = new coord();
 
-  double dx, dy, dz;
-  double d2, d6, d12;
+  double d6 = d2*d2*d2;
+  double d12 = d6*d6;
+
+  distances->x = d2;
+  distances->y = d6;
+  distances->z = d12;
+
+  return distances;
+}
+
+double getDistanceSquared(int ibead, int jbead){
+  double dx = unc_pos[jbead].x - unc_pos[ibead].x;
+  double dy = unc_pos[jbead].y - unc_pos[ibead].y;
+  double dz = unc_pos[jbead].z - unc_pos[ibead].z;
+
+  dx -= boxl*rnd(dx/boxl);
+  dy -= boxl*rnd(dy/boxl);
+  dz -= boxl*rnd(dz/boxl);
+
+  double d2 = dx*dx+dy*dy+dz*dz;
+  return d2;
+}
+
+coord * getPreCalculatedDist(int tree_index){
+  coord * distances = new coord();
+
+  distances->x = aux_tree_d2[tree_index];
+  distances->y = aux_tree_d6[tree_index];
+  distances->z = aux_tree_d12[tree_index];
+
+  return distances;
+}
+
+coord * getDistances(int tree_index, int ibead, int jbead, coord *boxCenter, double width){
 
   if (indices_bhtree[tree_index] == empty_cell){
-    if (jbead != -indices_bhtree[tree_index]) {
-      /* bead moved out of cell and is to be reinserted in current empty cell */
-      indices_bhtree[tree_index] = -jbead;
-      reinserted++;
-    }
+    /* bead moved out of cell, mark build for rebuild and return distance */
+    rebuild = 1;
+    return calculateDistances(getDistanceSquared(ibead,jbead));
   }
 
- if (indices_bhtree[tree_index] < empty_cell) {  /* leaf found, calculate distance and return */
+ if (indices_bhtree[tree_index] < empty_cell) {
+   /* leaf found, calculate distance and return */
+
     if (jbead != -indices_bhtree[tree_index]) {
-      /* bead moved out of cell and is to be reinserted in current subtree*/
-      insert_bead_bhtree(tree_index, jbead, boxCenter, width);
-      reinserted++;
+      /* bead moved out of cell, mark build for rebuild and return distance*/
+      rebuild = 1;
+      return calculateDistances(getDistanceSquared(ibead,jbead));
     }
 
-    dx = unc_pos[jbead].x - unc_pos[ibead].x;
-    dy = unc_pos[jbead].y - unc_pos[ibead].y;
-    dz = unc_pos[jbead].z - unc_pos[ibead].z;
-
-    dx -= boxl*rnd(dx/boxl);
-    dy -= boxl*rnd(dy/boxl);
-    dz -= boxl*rnd(dz/boxl);
-
-    d2 = dx*dx+dy*dy+dz*dz;
-    d6 = d2*d2*d2;
-    d12 = d6*d6;
-
-    aux_tree_d2[tree_index] = d2;
-    aux_tree_d6[tree_index] = d6;
-    aux_tree_d12[tree_index] = d12;
-
+    /* found correct leaf */
     individual++;
+    return calculateDistances(getDistanceSquared(ibead,jbead));
 
-    return tree_index;
-
-  } else {  /* internal node (cell) found */
+  } else {
+    /* internal node (cell) found */
 
     if (aux_tree_d2[tree_index] != 0) {
       /* already calculated */
       approximated++;
-      return tree_index;
+      return getPreCalculatedDist(tree_index);
     }
 
     /* needs calculation */
     double s2 = width*width;
 
-    dx = (octet_center_mass[tree_index].x/octet_count_bhtree[tree_index]) - unc_pos[ibead].x;
-    dy = (octet_center_mass[tree_index].y/octet_count_bhtree[tree_index]) - unc_pos[ibead].y;
-    dz = (octet_center_mass[tree_index].z/octet_count_bhtree[tree_index]) - unc_pos[ibead].z;
+    double dx = (octet_center_mass[tree_index].x/octet_count_bhtree[tree_index]) - unc_pos[ibead].x;
+    double dy = (octet_center_mass[tree_index].y/octet_count_bhtree[tree_index]) - unc_pos[ibead].y;
+    double dz = (octet_center_mass[tree_index].z/octet_count_bhtree[tree_index]) - unc_pos[ibead].z;
 
     dx -= boxl*rnd(dx/boxl);
     dy -= boxl*rnd(dy/boxl);
     dz -= boxl*rnd(dz/boxl);
 
-    d2 = dx*dx+dy*dy+dz*dz;
+    double d2 = dx*dx+dy*dy+dz*dz;
 
     if(s2/d2 < theta2){
       /* cell is far enough to use this distance for calculations */
-      d6 = d2*d2*d2;
-      d12 = d6*d6;
+      double d6 = d2*d2*d2;
+      double d12 = d6*d6;
       aux_tree_d2[tree_index] = d2;
       aux_tree_d6[tree_index] = d6;
       aux_tree_d12[tree_index] = d12;
 
       approximated++;
-      return tree_index;
+      return getPreCalculatedDist(tree_index);
 
     } else {
       /* cell is close, search deeper */
       coord *subtree = find_subtree_coord(width, boxCenter, jbead);
       int subtree_index = get_subtree_index(subtree, indices_bhtree[tree_index]);
       coord *newCenter = get_udpated_center(boxCenter, subtree, width);
-      int foundIndex = distance_index(subtree_index, ibead, jbead, newCenter, width/2);
+      coord *distances = getDistances(subtree_index, ibead, jbead, newCenter, width/2);
       delete newCenter;
-      return foundIndex;
+      return distances;
     }
   }
 }
@@ -232,9 +246,8 @@ void bh_update_pair_list(){
     itype = itype_lj_nat[i];
     jtype = jtype_lj_nat[i];
 
-    int index = distance_index(0, ibead, jbead, boxCenter, rootWidth);
+    coord *distances = getDistances(0, ibead, jbead, boxCenter, rootWidth);
 
-    //rcut?
     nil_att++;
     ibead_pair_list_att[nil_att] = ibead;
     jbead_pair_list_att[nil_att] = jbead;
@@ -245,9 +258,11 @@ void bh_update_pair_list(){
     pl_lj_nat_pdb_dist6[nil_att] = lj_nat_pdb_dist6[i];
     pl_lj_nat_pdb_dist12[nil_att] = lj_nat_pdb_dist12[i];
 
-    att_pl_bh_d2[nil_att] = aux_tree_d2[index];
-    att_pl_bh_d6[nil_att] = aux_tree_d6[index];
-    att_pl_bh_d12[nil_att] = aux_tree_d12[index];
+    att_pl_bh_d2[nil_att] = distances->x;
+    att_pl_bh_d6[nil_att] = distances->y;
+    att_pl_bh_d12[nil_att] = distances->z;
+
+    delete distances;
   }
 
   /* aux tree reset for repulsive pair list */
@@ -266,7 +281,7 @@ void bh_update_pair_list(){
     itype = itype_lj_non_nat[i];
     jtype = jtype_lj_non_nat[i];
 
-    int index = distance_index(0, ibead, jbead, boxCenter, rootWidth);
+    coord *distances = getDistances(0, ibead, jbead, boxCenter, rootWidth);
 
     //rcut?
     nil_rep++;
@@ -275,9 +290,11 @@ void bh_update_pair_list(){
     itype_pair_list_rep[nil_rep] = itype;
     jtype_pair_list_rep[nil_rep] = jtype;
 
-    rep_pl_bh_d2[nil_rep] = aux_tree_d2[index];
-    rep_pl_bh_d6[nil_rep] = aux_tree_d6[index];
-    rep_pl_bh_d12[nil_rep] = aux_tree_d12[index];
+    rep_pl_bh_d2[nil_rep] = distances->x;
+    rep_pl_bh_d6[nil_rep] = distances->y;
+    rep_pl_bh_d12[nil_rep] = distances->z;
+
+    delete distances;
 
   }
 

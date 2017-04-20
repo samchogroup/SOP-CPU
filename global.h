@@ -143,6 +143,7 @@ extern double* rep_pl_bh_d12;
 extern int individual;
 extern int reinserted;
 extern int approximated;
+extern int rebuild;
 
 // coordinates and associated params
 extern int nbead;

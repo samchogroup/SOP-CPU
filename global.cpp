@@ -163,6 +163,7 @@ double* rep_pl_bh_d12;
 int individual = 0;
 int reinserted = 0;
 int approximated = 0;
+int rebuild = 0;
 
 
 // coordinates and associated params
