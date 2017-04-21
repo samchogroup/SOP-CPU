@@ -164,6 +164,7 @@ int individual = 0;
 int reinserted = 0;
 int approximated = 0;
 int rebuild = 0;
+int *aux_matrix;
 
 
 // coordinates and associated params

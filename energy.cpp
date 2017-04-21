@@ -401,6 +401,96 @@ void vdw_bh_forces()
   }
 }
 
+void bh_traverse(int tree_index, int ibead, double width, coord *d2_6_12, coord *dx_y_z){
+  if (indices_bhtree[tree_index] == empty_cell) {
+    /* empty leaf */
+    return;
+  }
+
+  if (indices_bhtree[tree_index] < empty_cell) {
+    /* leaf found, add forces and return */
+    double dx, dy, dz, d2, d6, d12;
+    int jbead = -indices_bhtree[tree_index];
+    int att = aux_matrix[((ibead+1)*nbead)+jbead];
+    int itype, jtype;
+
+    if(att > 0){
+      /* attractive */
+      itype = itype_pair_list_rep[att];
+      jtype = jtype_pair_list_rep[att];
+
+      if(d2_6_12 != NULL){
+        d2 = d2_6_12.x; d6 = d2_6_12.y; d12 = d2_6_12.z;
+        dx = dx_y_z.x; dy = dx_y_z.y; dz = dx_y_z.z;
+      } else {
+        dx = unc_pos[jbead].x - unc_pos[ibead].x;
+        dy = unc_pos[jbead].y - unc_pos[ibead].y;
+        dz = unc_pos[jbead].z - unc_pos[ibead].z;
+
+        dx -= boxl*rnd(dx/boxl);
+        dy -= boxl*rnd(dy/boxl);
+        dz -= boxl*rnd(dz/boxl);
+
+        d2 = dx*dx+dy*dy+dz*dz;
+        if( d2 <  rep_tol ) return;
+        d6 = d2*d2*d2;
+        d12 = d6*d6;
+      }
+      co1 = force_coeff_rep[itype][jtype]/d2*(2.0*sigma_rep12[itype][jtype]/d12+sigma_rep6[itype][jtype]/d6);
+
+      fx = co1*dx;
+      fy = co1*dy;
+      fz = co1*dz;
+
+      force[ibead].x += fx;
+      force[ibead].y += fy;
+      force[ibead].z += fz;
+
+      force[jbead].x -= fx;
+      force[jbead].y -= fy;
+      force[jbead].z -= fz;
+
+    } else {
+      /* repuslive */
+    }
+
+  } else {
+    /* internal node found */
+
+    double s2 = width*width;
+
+    double dx = (octet_center_mass[tree_index].x/octet_count_bhtree[tree_index]) - unc_pos[ibead].x;
+    double dy = (octet_center_mass[tree_index].y/octet_count_bhtree[tree_index]) - unc_pos[ibead].y;
+    double dz = (octet_center_mass[tree_index].z/octet_count_bhtree[tree_index]) - unc_pos[ibead].z;
+
+    dx -= boxl*rnd(dx/boxl);
+    dy -= boxl*rnd(dy/boxl);
+    dz -= boxl*rnd(dz/boxl);
+
+    double d2 = dx*dx+dy*dy+dz*dz;
+
+    if (s2/d2 < theta2) {
+      /* cell is far away enough to use this distance for next calculations */
+
+
+
+
+    } else {
+      /* keep traversing the tree */
+    }
+  }
+
+}
+
+void vdw_bh()
+{
+  using namespace std;
+
+  for (int i = 1; i < nbead; i++) {
+    bh_vdw_force(0, i, rootWidth, 0.0, NULL, NULL);
+  }
+}
+
 void vdw_forces()
 {
   using namespace std;

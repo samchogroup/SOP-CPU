@@ -127,6 +127,7 @@ extern double e_vdw_rr_rep;
 
 // barnes_hut tree
 extern double theta, theta2;
+extern double rootWidth;
 const int empty_cell = 0;
 extern int* indices_bhtree;
 extern double* aux_tree_d2;
@@ -144,6 +145,7 @@ extern int individual;
 extern int reinserted;
 extern int approximated;
 extern int rebuild;
+extern int *aux_matrix;
 
 // coordinates and associated params
 extern int nbead;

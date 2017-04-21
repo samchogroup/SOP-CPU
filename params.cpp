@@ -221,6 +221,7 @@ void load(int icmd)
       	pl_lj_nat_pdb_dist2[nil_att] = lj_nat_pdb_dist2[icon_att];
       	pl_lj_nat_pdb_dist6[nil_att] = lj_nat_pdb_dist6[icon_att];
       	pl_lj_nat_pdb_dist12[nil_att] = lj_nat_pdb_dist12[icon_att];
+        aux_matrix[((ibead+1)*nbead)+jbead] = nil_att;
       } else {
       	icon_rep++;
       	ibead_lj_non_nat[icon_rep] = ibead;
@@ -233,6 +234,7 @@ void load(int icmd)
       	jbead_pair_list_rep[nil_rep] = jbead;
       	itype_pair_list_rep[nil_rep] = itype;
       	jtype_pair_list_rep[nil_rep] = jtype;
+        aux_matrix[((ibead+1)*nbead)+jbead] = -nil_rep;
       }
     }
     in.close();
@@ -357,6 +359,8 @@ void alloc_arrays()
   rep_pl_bh_d2 = new double[ncon_rep+1];
   rep_pl_bh_d6 = new double[ncon_rep+1];
   rep_pl_bh_d12 = new double[ncon_rep+1];
+
+  aux_matrix = new int[(nbead+1)*(nbead+1)]();
 
   lj_rna_rna_allocated = 1;
 
@@ -490,6 +494,7 @@ void release_lj()
   delete [] jtype_neighbor_list_rep;
 
   // pair list
+  delete [] aux_matrix;
   delete [] ibead_pair_list_att;
   delete [] jbead_pair_list_att;
   delete [] itype_pair_list_att;
