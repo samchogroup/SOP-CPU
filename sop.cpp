@@ -127,7 +127,7 @@ void underdamped_ctrl()
     update_pair_list();
   } else if (barnesHut == 1){
     build_bh_tree();
-    bh_update_pair_list();
+    // bh_update_pair_list();
   }
 
   set_potential();
@@ -163,7 +163,7 @@ void underdamped_ctrl()
           update_neighbor_list();
         } else if (celllist == 1) {
           update_cell_list();
-        } else if (barnesHut == 1 && rebuild == 1){
+        } else if (barnesHut == 1){
           build_bh_tree();
         }
 	       //	fprintf(stderr, "(%.0lf) neighbor list: (%d/%d)\n", istep, nnl_att, nnl_rep);
@@ -318,10 +318,6 @@ void underdamped_iteration(coord* incr)
   }
 
   // force_update
-
-  if (barnesHut == 1) {
-    bh_update_pair_list();
-  }
 
   force_eval();
 

@@ -1,4 +1,4 @@
-CC = g++ -O3
+CC = g++ -O3 -g -O0
 
 EFILE = ./sop.x
 OBJS = ./bin/sop.o ./bin/random_generator.o ./bin/global.o ./bin/energy.o ./bin/io.o ./bin/params.o ./bin/neighbor_list.o ./bin/cell_list.o ./bin/barnes_hut.o

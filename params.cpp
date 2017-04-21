@@ -221,7 +221,7 @@ void load(int icmd)
       	pl_lj_nat_pdb_dist2[nil_att] = lj_nat_pdb_dist2[icon_att];
       	pl_lj_nat_pdb_dist6[nil_att] = lj_nat_pdb_dist6[icon_att];
       	pl_lj_nat_pdb_dist12[nil_att] = lj_nat_pdb_dist12[icon_att];
-        aux_matrix[((ibead+1)*nbead)+jbead] = nil_att;
+        aux_matrix[(ibead*(nbead+1))+jbead] = nil_att;
       } else {
       	icon_rep++;
       	ibead_lj_non_nat[icon_rep] = ibead;
@@ -234,10 +234,16 @@ void load(int icmd)
       	jbead_pair_list_rep[nil_rep] = jbead;
       	itype_pair_list_rep[nil_rep] = itype;
       	jtype_pair_list_rep[nil_rep] = jtype;
-        aux_matrix[((ibead+1)*nbead)+jbead] = -nil_rep;
+        aux_matrix[(ibead*(nbead+1))+jbead] = -nil_rep;
       }
     }
     in.close();
+    for (int i = 1; i <= nbead; i++) {
+      for (int j = 1; j <= nbead; j++) {
+        int algo =  aux_matrix[(i*(nbead+1))+j];
+      }
+    }
+    std::cout << "/* message */" << '\n';
     cout << "[Finished reading VDW interactions (" << icon_att << "/" << icon_rep <<")]" << endl;
   } else if(!strcmp(opt[opt_ptr[icmd]],"init")) { // load init coordinates
     cout << "[Reading in initial coordinates...]" << endl;

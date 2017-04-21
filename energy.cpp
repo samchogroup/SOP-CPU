@@ -402,26 +402,34 @@ void vdw_bh_forces()
 }
 
 void bh_traverse(int tree_index, int ibead, double width, coord *d2_6_12, coord *dx_y_z){
-  if (indices_bhtree[tree_index] == empty_cell) {
-    /* empty leaf */
+  if (indices_bhtree[tree_index] == empty_cell || indices_bhtree[tree_index] == -ibead) {
+    /* empty leaf or itself */
     return;
   }
 
+  double dx, dy, dz, d2, d6, d12, co1, rep_tol;
+
   if (indices_bhtree[tree_index] < empty_cell) {
     /* leaf found, add forces and return */
-    double dx, dy, dz, d2, d6, d12;
     int jbead = -indices_bhtree[tree_index];
-    int att = aux_matrix[((ibead+1)*nbead)+jbead];
+    int type = aux_matrix[(ibead*(nbead+1))+jbead];
+    if (type == 0) {
+      return;
+    }
+    const static double tol = 1.0e-7;
     int itype, jtype;
+    double fx,fy,fz;
+    std::cout << type << '\n';
 
-    if(att > 0){
+    if(type > 0){
       /* attractive */
-      itype = itype_pair_list_rep[att];
-      jtype = jtype_pair_list_rep[att];
+      int att = type;
+      itype = itype_pair_list_att[att];
+      jtype = jtype_pair_list_att[att];
 
       if(d2_6_12 != NULL){
-        d2 = d2_6_12.x; d6 = d2_6_12.y; d12 = d2_6_12.z;
-        dx = dx_y_z.x; dy = dx_y_z.y; dz = dx_y_z.z;
+        d2 = d2_6_12->x; d6 = d2_6_12->y; d12 = d2_6_12->z;
+        dx = dx_y_z->x; dy = dx_y_z->y; dz = dx_y_z->z;
       } else {
         dx = unc_pos[jbead].x - unc_pos[ibead].x;
         dy = unc_pos[jbead].y - unc_pos[ibead].y;
@@ -432,62 +440,106 @@ void bh_traverse(int tree_index, int ibead, double width, coord *d2_6_12, coord 
         dz -= boxl*rnd(dz/boxl);
 
         d2 = dx*dx+dy*dy+dz*dz;
-        if( d2 <  rep_tol ) return;
+        rep_tol = sigma_rep2[itype][jtype]*tol;
+        if( d2 < tol*lj_nat_pdb_dist2[att] ) return;
         d6 = d2*d2*d2;
         d12 = d6*d6;
       }
-      co1 = force_coeff_rep[itype][jtype]/d2*(2.0*sigma_rep12[itype][jtype]/d12+sigma_rep6[itype][jtype]/d6);
 
-      fx = co1*dx;
-      fy = co1*dy;
-      fz = co1*dz;
-
-      force[ibead].x += fx;
-      force[ibead].y += fy;
-      force[ibead].z += fz;
-
-      force[jbead].x -= fx;
-      force[jbead].y -= fy;
-      force[jbead].z -= fz;
+      co1 = force_coeff_att[itype][jtype]/d2*((pl_lj_nat_pdb_dist12[att]/d12)-(pl_lj_nat_pdb_dist6[att]/d6));
 
     } else {
       /* repuslive */
+      int rep = -type;
+
+      itype = itype_pair_list_rep[rep];
+      jtype = jtype_pair_list_rep[rep];
+
+      if(d2_6_12 != NULL){
+        d2 = d2_6_12->x; d6 = d2_6_12->y; d12 = d2_6_12->z;
+        dx = dx_y_z->x; dy = dx_y_z->y; dz = dx_y_z->z;
+        approximated++;
+      } else {
+        individual++;
+        dx = unc_pos[jbead].x - unc_pos[ibead].x;
+        dy = unc_pos[jbead].y - unc_pos[ibead].y;
+        dz = unc_pos[jbead].z - unc_pos[ibead].z;
+
+        // min images
+
+        dx -= boxl*rnd(dx/boxl);
+        dy -= boxl*rnd(dy/boxl);
+        dz -= boxl*rnd(dz/boxl);
+
+        d2 = dx*dx+dy*dy+dz*dz;
+        if( d2 <  rep_tol ) return;
+        d6 = d2*d2*d2;
+        d12 = d6*d6;
+
+        co1 = force_coeff_rep[itype][jtype]/d2*
+          (2.0*sigma_rep12[itype][jtype]/d12+sigma_rep6[itype][jtype]/d6);
+      }
     }
+
+    fx = co1*dx;
+    fy = co1*dy;
+    fz = co1*dz;
+
+    force[ibead].x += fx;
+    force[ibead].y += fy;
+    force[ibead].z += fz;
+
+    force[jbead].x -= fx;
+    force[jbead].y -= fy;
+    force[jbead].z -= fz;
 
   } else {
     /* internal node found */
 
     double s2 = width*width;
 
-    double dx = (octet_center_mass[tree_index].x/octet_count_bhtree[tree_index]) - unc_pos[ibead].x;
-    double dy = (octet_center_mass[tree_index].y/octet_count_bhtree[tree_index]) - unc_pos[ibead].y;
-    double dz = (octet_center_mass[tree_index].z/octet_count_bhtree[tree_index]) - unc_pos[ibead].z;
+    dx = (octet_center_mass[tree_index].x/octet_count_bhtree[tree_index]) - unc_pos[ibead].x;
+    dy = (octet_center_mass[tree_index].y/octet_count_bhtree[tree_index]) - unc_pos[ibead].y;
+    dz = (octet_center_mass[tree_index].z/octet_count_bhtree[tree_index]) - unc_pos[ibead].z;
 
     dx -= boxl*rnd(dx/boxl);
     dy -= boxl*rnd(dy/boxl);
     dz -= boxl*rnd(dz/boxl);
 
     double d2 = dx*dx+dy*dy+dz*dz;
+    coord *xyz = NULL;
+    coord *dist = NULL;
 
     if (s2/d2 < theta2) {
       /* cell is far away enough to use this distance for next calculations */
+      xyz = new coord();
+      xyz->x = dx; xyz->y = dy; xyz->z = dz;
 
+      dist = new coord();
 
+      d6 = d2*d2*d2;
+      d12 = d6*d6;
 
-
-    } else {
-      /* keep traversing the tree */
+      dist->x = d2; dist->y = d6; dist->z = d12;
     }
-  }
 
+    int childIndices = indices_bhtree[tree_index];
+
+    for (int i = 0; i < 8; i++) {
+      /* traverse kids */
+      bh_traverse(childIndices+i, ibead, width/2, dist, xyz);
+    }
+
+    delete xyz; delete dist;
+  }
 }
 
 void vdw_bh()
 {
   using namespace std;
 
-  for (int i = 1; i < nbead; i++) {
-    bh_vdw_force(0, i, rootWidth, 0.0, NULL, NULL);
+  for (int i = 1; i <= nbead; i++) {
+    bh_traverse(0, i, rootWidth, NULL, NULL);
   }
 }
 
@@ -496,7 +548,8 @@ void vdw_forces()
   using namespace std;
 
   if(barnesHut){
-    vdw_bh_forces();
+    // vdw_bh_forces();
+    vdw_bh();
     return;
   }
 
