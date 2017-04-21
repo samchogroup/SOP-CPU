@@ -419,7 +419,6 @@ void bh_traverse(int tree_index, int ibead, double width, coord *d2_6_12, coord 
     const static double tol = 1.0e-7;
     int itype, jtype;
     double fx,fy,fz;
-    std::cout << type << '\n';
 
     if(type > 0){
       /* attractive */
