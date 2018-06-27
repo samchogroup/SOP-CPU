@@ -141,7 +141,13 @@ void print_sim_params() {
     cout << oline << endl;
     sprintf(oline,"Cell List Update Frequency        : %d", nnlup);
     cout << oline << endl;
-
+    sprintf(oline,"Number of Cells Each Dimension    : %.0lf", ncell);
+    cout << oline << endl;
+  } else if (cellarray == 1 || hybrid == 1) {		// SAJANT - 04/15/17 - cell array simulation type
+    sprintf(oline,"Long-range Cutoff Type            : %s", "Cell Array");
+    cout << oline << endl;
+    sprintf(oline,"Cell Array Update Frequency        : %d", nnlup);
+    cout << oline << endl;
     sprintf(oline,"Number of Cells Each Dimension    : %.0lf", ncell);
     cout << oline << endl;
   } else {

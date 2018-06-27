@@ -64,6 +64,9 @@ void set_params(int icmd)
   } else if( !strcmp(opt[opt_ptr[icmd]],"cutofftype") ) { // neighbor list on or off?
     if( !strcmp(opt[opt_ptr[icmd]+1],"neighborlist" ) ) { neighborlist = 1; }
     else if( !strcmp(opt[opt_ptr[icmd]+1],"celllist" ) ) { celllist = 1; }
+    else if( !strcmp(opt[opt_ptr[icmd]+1],"cellarray" ) ) { cellarray = 1; }	// SAJANT
+    else if( !strcmp(opt[opt_ptr[icmd]+1],"hybrid" ) ) {hybrid = 1; }
+    else if( !strcmp(opt[opt_ptr[icmd]+1],"twocells" ) ) {twocells = 1; }
     else { }
 
   } else if( !strcmp(opt[opt_ptr[icmd]],"nnlup") ) { // neighbor / cell list update frequency
@@ -144,7 +147,6 @@ void load(int icmd)
       pdb_dist[i] = atof(tokPtr); // equilibrium distance (angstrom)
     }
     in.close(); // close file
-    cout << "[Finished reading bonds (" << nbnd <<")]" << endl;
   } else if(!strcmp(opt[opt_ptr[icmd]],"angles")) { // load angles
     cout << "[Reading in angles...]" << endl;
     in.clear();
@@ -194,6 +196,17 @@ void load(int icmd)
       itype = atoi(tokPtr);
       tokPtr = strtok(NULL," ");
       jtype = atoi(tokPtr);
+      
+      ibead_lj_tot[i] = ibead;			//SAJANT 04/14/17 - Added so that in cell_array, I can find the necessary information when looking through cells based on the numbers of i and j bead
+      jbead_lj_tot[i] = jbead;			//SAJANT 04/14/17 - Same
+      itype_lj_tot[i] = itype;			//SAJANT 04/14/17 - Same
+      jtype_lj_tot[i] = jtype;			//SAJANT 04/14/17 - Same
+
+      lg_tot_pdb_dist[i] = r_ij;		//SAJANT 04/14/17 - Same
+      lg_tot_pdb_dist2[i] = r_ij*r_ij;		//SAJANT 04/14/17 - Same
+      lg_tot_pdb_dist6[i] = lg_tot_pdb_dist2[i]*lg_tot_pdb_dist2[i]*lg_tot_pdb_dist2[i];		//SAJANT 04/14/17 - Same
+      lg_tot_pdb_dist12[i] = lg_tot_pdb_dist6[i]*lg_tot_pdb_dist6[i];		//SAJANT 04/14/17 - Same
+
       if (r_ij < rcut_nat[itype][jtype]) {
 	icon_att++;
 	ibead_lj_nat[icon_att] = ibead;
@@ -230,6 +243,10 @@ void load(int icmd)
 	jtype_pair_list_rep[nil_rep] = jtype;
       }
     }
+
+    lcell = boxl / ncell;
+    numCells = ncell*ncell*ncell;
+    cells = new int[numCells];
     in.close();
     cout << "[Finished reading VDW interactions (" << icon_att << "/" << icon_rep <<")]" << endl;
   } else if(!strcmp(opt[opt_ptr[icmd]],"init")) { // load init coordinates
@@ -296,6 +313,7 @@ void alloc_arrays()
 
   ncon_att = 8996;
   ncon_rep = 1157632;
+  ncon_tot = ncon_rep + ncon_att;		//SAJANT 04/14/17 - Same
   // neighbor list
   nnl_att = 0;
   nnl_rep = 0;
@@ -323,6 +341,15 @@ void alloc_arrays()
   jbead_lj_non_nat = new int[ncon_rep+1];
   itype_lj_non_nat = new int[ncon_rep+1];
   jtype_lj_non_nat = new int[ncon_rep+1];
+
+  ibead_lj_tot = new int[ncon_tot+1];		//SAJANT 04/14/17 - Same
+  jbead_lj_tot = new int[ncon_tot+1];		//SAJANT 04/14/17 - Same
+  itype_lj_tot = new int[ncon_tot+1];		//SAJANT 04/14/17 - Same
+  jtype_lj_tot = new int[ncon_tot+1];		//SAJANT 04/14/17 - Same
+  lg_tot_pdb_dist = new double[ncon_tot+1];	//SAJANT 04/14/17 - Same
+  lg_tot_pdb_dist2 = new double[ncon_tot+1];	//SAJANT 04/14/17 - Same
+  lg_tot_pdb_dist6 = new double[ncon_tot+1];	//SAJANT 04/14/17 - Same
+  lg_tot_pdb_dist12 = new double[ncon_tot+1];	//SAJANT 04/14/17 - Same
 
   ibead_neighbor_list_att = new int[ncon_att+1];
   jbead_neighbor_list_att = new int[ncon_att+1];
@@ -376,6 +403,9 @@ void alloc_arrays()
 
   neighborlist = 0; // neighbor list cutoff method?
   celllist = 0; // cell list cutoff method?
+  cellarray = 0; // SAJANT - cell array cutoff method?
+  hybrid = 0; // SAJANT - hybrid cutoff method?
+  twocells = 0; // SAJANT - twoCells cutoff method?
   boxl = 500.0;
   ncell = 55.0;
   lcell = boxl / ncell;
@@ -462,6 +492,18 @@ void release_lj()
   delete [] itype_lj_non_nat;
   delete [] jtype_lj_non_nat;
 
+  // arrays for total lists needed for cell_array implementation
+  delete [] ibead_lj_tot;		//SAJANT 04/14/17 - Same
+  delete [] jbead_lj_tot;		//SAJANT 04/14/17 - Same
+  delete [] itype_lj_tot;		//SAJANT 04/14/17 - Same
+  delete [] jtype_lj_tot;		//SAJANT 04/14/17 - Same
+  delete [] lg_tot_pdb_dist;	//SAJANT 04/14/17 - Same
+  delete [] lg_tot_pdb_dist2;	//SAJANT 04/14/17 - Same
+  delete [] lg_tot_pdb_dist6;	//SAJANT 04/14/17 - Same
+  delete [] lg_tot_pdb_dist12;	//SAJANT 04/14/17 - Same
+  delete [] beadLinks;
+  delete [] cells;
+
   delete [] ibead_neighbor_list_att;
   delete [] jbead_neighbor_list_att;
   delete [] itype_neighbor_list_att;
@@ -499,6 +541,7 @@ void init_lj(int numatt, int numrep )
 
   ncon_att = numatt;
   ncon_rep = numrep;
+  ncon_tot = numatt + numrep;			//SAJANT 04/14/17 - Same
   ibead_lj_nat = new int[numatt+1];
   jbead_lj_nat = new int[numatt+1];
   itype_lj_nat = new int[numatt+1];
@@ -511,6 +554,15 @@ void init_lj(int numatt, int numrep )
   jbead_lj_non_nat = new int[numrep+1];
   itype_lj_non_nat = new int[numrep+1];
   jtype_lj_non_nat = new int[numrep+1];
+
+  ibead_lj_tot = new int[ncon_tot+1];		//SAJANT 04/14/17 - Same
+  jbead_lj_tot = new int[ncon_tot+1];		//SAJANT 04/14/17 - Same
+  itype_lj_tot = new int[ncon_tot+1];		//SAJANT 04/14/17 - Same
+  jtype_lj_tot = new int[ncon_tot+1];		//SAJANT 04/14/17 - Same
+  lg_tot_pdb_dist = new double[ncon_tot+1];	//SAJANT 04/14/17 - Same
+  lg_tot_pdb_dist2 = new double[ncon_tot+1];	//SAJANT 04/14/17 - Same
+  lg_tot_pdb_dist6 = new double[ncon_tot+1];	//SAJANT 04/14/17 - Same
+  lg_tot_pdb_dist12 = new double[ncon_tot+1];	//SAJANT 04/14/17 - Same
 
   ibead_neighbor_list_att = new int[numatt+1];
   jbead_neighbor_list_att = new int[numatt+1];
@@ -556,6 +608,8 @@ void init_pos(int nbead)
   unc_pos_allocated = 1;
   vel_allocated = 1;
   force_allocated = 1;
+
+  beadLinks = new int[nbead];		//SAJANT - 04/21/17 - cell-array next pointers.
 }
 
 void release_pos()

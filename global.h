@@ -56,6 +56,7 @@ extern double f_ang_ss_coeff;
 
 extern int ncon_att; // number of native contacts
 extern int ncon_rep; // repulisve non-native contact
+extern int ncon_tot; // SAJANT 04/14/17 - Same; total number of contacts - ncon_att + ncon_rep
 
 // neighbor list
 extern int nnl_att;
@@ -86,6 +87,19 @@ extern int* ibead_lj_non_nat;
 extern int* jbead_lj_non_nat;
 extern int* itype_lj_non_nat;
 extern int* jtype_lj_non_nat;
+
+// cell array
+extern int* ibead_lj_tot;		//SAJANT 04/14/17 - Same
+extern int* jbead_lj_tot;		//SAJANT 04/14/17 - Same
+extern int* itype_lj_tot;		//SAJANT 04/14/17 - Same
+extern int* jtype_lj_tot;		//SAJANT 04/14/17 - Same
+extern double* lg_tot_pdb_dist;	//SAJANT 04/14/17 - Same
+extern double* lg_tot_pdb_dist2;	//SAJANT 04/14/17 - Same
+extern double* lg_tot_pdb_dist6;	//SAJANT 04/14/17 - Same
+extern double* lg_tot_pdb_dist12;	//SAJANT 04/14/17 - Same
+extern int numCells;
+extern int* beadLinks;
+extern int* cells;
 
 // neighbor / cell list
 extern int* ibead_neighbor_list_att;
@@ -151,6 +165,9 @@ extern int sim_type; // integration scheme 1 = underdamped; 2 = overdamped
 extern double T; // temperature (kcal/mol)
 extern int neighborlist; // neighbor list cutoff method?
 extern int celllist; // cell list cutoff method?
+extern int cellarray; // SAJANT - cell array cutoff method?
+extern int hybrid; // SAJANT - hybrid cutoff method?
+extern int twocells; // SAJANT - twocells cutoff method?
 extern double minT; // minimum temperature determines crowder cutoffs
 extern double boxl; // Length of an edge of the simulation box
 extern double ncell;

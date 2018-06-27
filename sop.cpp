@@ -13,6 +13,8 @@
 #include "params.h"
 #include "neighbor_list.h"
 #include "cell_list.h"
+#include "cell_array.h"
+#include "two_cells.h"
 
 int main(int argc,char* argv[])
 {
@@ -102,7 +104,6 @@ void underdamped_ctrl()
   static int first_time = 1;
 
   coord* incr = new coord[nbead+1];
-
   if( (!restart)&&first_time ) { // zero out the velocities and forces
     for( int i=1; i<=nbead; i++ ) {
       vel[i].x = 0.0;
@@ -115,13 +116,21 @@ void underdamped_ctrl()
   }
 
   print_sim_params();
-
+  
   if (neighborlist == 1) {
     update_neighbor_list();
     update_pair_list();
   } else if (celllist == 1) {
     update_cell_list();
     update_pair_list();
+  } else if (cellarray == 1) {
+    update_cell_array();
+  } else if (hybrid == 1) {	// SAJANT
+    update_cell_array();
+    update_pair_list();
+  } else if (twocells == 1) { 	// SAJANT
+    update_cell_array();
+    update_two_cells();
   }
 
   set_potential();
@@ -151,22 +160,27 @@ void underdamped_ctrl()
       record_traj(binfname,uncbinfname);
     }
     while( istep <= nstep ) {
-
       // compute pair separation list
       if ((inlup % nnlup) == 0) {
         if (neighborlist == 1) {
           update_neighbor_list();
         } else if (celllist == 1) {
           update_cell_list();
-        }
+        } else if (hybrid == 1 || twocells == 1) {	// SAJANT
+	  update_cell_array();
+	}
 	//	fprintf(stderr, "(%.0lf) neighbor list: (%d/%d)\n", istep, nnl_att, nnl_rep);
         inlup = 0;
       }
       inlup++;
 
-      if (neighborlist == 1 || celllist == 1) {
+      if (neighborlist == 1 || celllist == 1 || hybrid == 1) {	// SAJANT
         update_pair_list();
 //	fprintf(stderr, "(%.0lf) pair list: (%d/%d)\n", istep, nil_att, nil_rep);
+      } else if (twocells == 1) {
+	update_two_cells();
+      } else if (cellarray == 1) {
+	update_cell_array();
       }
 
       underdamped_iteration(incr);
@@ -189,10 +203,10 @@ void underdamped_ctrl()
     }
     out.close();
   }
-
+  
   if( first_time ) first_time = 0;
 
-  delete [] incr;
+  //delete [] incr;
 
   return;
 }
@@ -394,6 +408,9 @@ void overdamped_ctrl()
   } else if (celllist == 1) {
     update_cell_list();
     update_pair_list();
+  } else if (cellarray == 1 || hybrid == 1) {	// SAJANT
+    update_cell_array();
+    update_pair_list();
   }
 
   set_potential();
@@ -430,13 +447,15 @@ void overdamped_ctrl()
           update_neighbor_list();
         } else if (celllist == 1) {
           update_cell_list();
+	} else if (hybrid == 1) {	// SAJANT
+	  update_cell_array();
         }
 	//	fprintf(stderr, "(%.0lf) neighbor list: (%d/%d)\n", istep, nnl_att, nnl_rep);
         inlup = 0;
       }
       inlup++;
 
-      if (neighborlist == 1 || celllist == 1) {
+      if (neighborlist == 1 || celllist == 1 || cellarray == 1 || hybrid == 1) {	// SAJANT
         update_pair_list();
 //	fprintf(stderr, "(%.0lf) pair list: (%d/%d)\n", istep, nil_att, nil_rep);
       }

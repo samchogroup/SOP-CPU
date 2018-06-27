@@ -47,6 +47,7 @@ double f_ang_ss_coeff;
 
 int ncon_att; // number of native contacts
 int ncon_rep; // repulisve non-native contact
+int ncon_tot; // SAJANT 04/14/17 - Same; total number of contacts - ncon_att + ncon_rep
 
 // neighbor list
 int nnl_att;
@@ -104,6 +105,19 @@ int* ibead_lj_non_nat;
 int* jbead_lj_non_nat;
 int* itype_lj_non_nat;
 int* jtype_lj_non_nat;
+
+// cell array
+int* ibead_lj_tot;		//SAJANT 04/14/17 - Same
+int* jbead_lj_tot;		//SAJANT 04/14/17 - Same
+int* itype_lj_tot;		//SAJANT 04/14/17 - Same
+int* jtype_lj_tot;		//SAJANT 04/14/17 - Same
+double* lg_tot_pdb_dist;	//SAJANT 04/14/17 - Same
+double* lg_tot_pdb_dist2;	//SAJANT 04/14/17 - Same
+double* lg_tot_pdb_dist6;	//SAJANT 04/14/17 - Same
+double* lg_tot_pdb_dist12;	//SAJANT 04/14/17 - Same
+int numCells;
+int* beadLinks;
+int* cells;
 
 // neighbor / cell list
 int* ibead_neighbor_list_att;
@@ -168,6 +182,9 @@ int sim_type = 1; // integration scheme; default is underdamped
 double T; // temperature
 int neighborlist = 0; // neighbor list cutoff method?
 int celllist = 0; // cell list cutoff method?
+int cellarray = 0; // SAJANT - cell array cutoff method?
+int hybrid = 0; // SAJANT - hybrid cutoff method?
+int twocells = 0; // SAJANT - twocells cutoff method?
 double boxl; // Length of an edge of the simulation box
 double ncell;
 double lcell;
