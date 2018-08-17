@@ -167,7 +167,6 @@ extern int neighborlist; // neighbor list cutoff method?
 extern int celllist; // cell list cutoff method?
 extern int cellarray; // SAJANT - cell array cutoff method?
 extern int hybrid; // SAJANT - hybrid cutoff method?
-extern int twocells; // SAJANT - twocells cutoff method?
 extern double minT; // minimum temperature determines crowder cutoffs
 extern double boxl; // Length of an edge of the simulation box
 extern double ncell;

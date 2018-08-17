@@ -1,13 +1,13 @@
 CC = g++ -O3
 
 EFILE = ./sop.x
-OBJS = ./sop.o ./random_generator.o ./global.o ./energy.o ./io.o ./params.o ./neighbor_list.o ./cell_list.o ./cell_array.o ./two_cells.o
+OBJS = ./sop.o ./random_generator.o ./global.o ./energy.o ./io.o ./params.o ./neighbor_list.o ./cell_list.o ./cell_array.o
 
 sop.x: $(OBJS)
 	@echo "linking ..."
 	$(CC) -o $(EFILE) $(OBJS)
 
-sop.o: ./sop.h ./random_generator.h ./global.h ./energy.h ./io.h ./params.h ./neighbor_list.h ./cell_list.o ./cell_array.o ./two_cells.o
+sop.o: ./sop.h ./random_generator.h ./global.h ./energy.h ./io.h ./params.h ./neighbor_list.h ./cell_list.o ./cell_array.o
 	$(CC) -c ./sop.cpp -o ./sop.o
 
 random_generator.o: ./random_generator.h
@@ -33,9 +33,6 @@ cell_list.o: ./global.h ./cell_list.h
 
 cell_array.o: ./global.h ./cell_array.h
 		$(CC) -c ./cell_array.cpp -o ./cell_array.o
-
-two_cells.o: ./global.h ./two_cells.h
-		$(CC) -c ./two_cells.cpp -o ./two_cells.o
 
 clean:
 	rm -f $(OBJS) $(EFILE)

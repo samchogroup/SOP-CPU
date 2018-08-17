@@ -184,7 +184,6 @@ int neighborlist = 0; // neighbor list cutoff method?
 int celllist = 0; // cell list cutoff method?
 int cellarray = 0; // SAJANT - cell array cutoff method?
 int hybrid = 0; // SAJANT - hybrid cutoff method?
-int twocells = 0; // SAJANT - twocells cutoff method?
 double boxl; // Length of an edge of the simulation box
 double ncell;
 double lcell;

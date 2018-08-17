@@ -66,7 +66,6 @@ void set_params(int icmd)
     else if( !strcmp(opt[opt_ptr[icmd]+1],"celllist" ) ) { celllist = 1; }
     else if( !strcmp(opt[opt_ptr[icmd]+1],"cellarray" ) ) { cellarray = 1; }	// SAJANT
     else if( !strcmp(opt[opt_ptr[icmd]+1],"hybrid" ) ) {hybrid = 1; }
-    else if( !strcmp(opt[opt_ptr[icmd]+1],"twocells" ) ) {twocells = 1; }
     else { }
 
   } else if( !strcmp(opt[opt_ptr[icmd]],"nnlup") ) { // neighbor / cell list update frequency
@@ -405,7 +404,6 @@ void alloc_arrays()
   celllist = 0; // cell list cutoff method?
   cellarray = 0; // SAJANT - cell array cutoff method?
   hybrid = 0; // SAJANT - hybrid cutoff method?
-  twocells = 0; // SAJANT - twoCells cutoff method?
   boxl = 500.0;
   ncell = 55.0;
   lcell = boxl / ncell;

@@ -141,6 +141,110 @@ void update_cell_array() {
 	//exit(0);
 }
 
+
+/* Same as above function, but rather than put beads into pair list, put into neighbor list. */
+void update_cell_array_hybrid() {
+	int imcx, imcy, imcz, index;
+	int itype, jtype, j, displacementBead, displacement;
+	
+	double minX, minY, minZ;
+	
+	minX = pos[1].x;
+	minY = pos[1].y;
+	minZ = pos[1].z;
+
+	for(int i = 2; i <= nbead; i++) {
+		if (pos[i].x < minX) {
+			minX = pos[i].x;
+		}
+
+		if (pos[i].y < minY) {
+			minY = pos[i].y;
+		}
+
+		if (pos[i].z < minZ) {
+			minZ = pos[i].z;
+		}
+	}
+	
+	memset(cells, -1, numCells * sizeof(int));
+	memset(beadLinks, -1, nbead * sizeof(int));
+	
+	for (int i = 1; i <= nbead; i++ ) {
+		
+		imcx = floor((pos[i].x - minX) / lcell) ;
+		imcy = floor((pos[i].y - minY) / lcell) ;
+		imcz = floor((pos[i].z - minZ) / lcell) ;
+		
+		index = (imcz) * (ncell)*(ncell) + imcy * (ncell) + imcx;
+		
+		beadLinks[i] = cells[index];
+		cells[index] = i;
+
+	}
+
+	nnl_att = 0;
+ 	nnl_rep = 0;
+ 	
+
+	int tempx, tempy, tempz, cellN;
+	cellN = int(ncell);
+	for (int i = 1; i<= nbead - 3; i++) {
+
+		imcx = floor((pos[i].x - minX) / lcell) ;
+		imcy = floor((pos[i].y - minY) / lcell) ;
+		imcz = floor((pos[i].z - minZ) / lcell) ;
+
+		displacementBead = (nbead-3)*(i-1) - (i-2)*(i-1)/2;
+		
+		for(int deltaZ = -1; deltaZ <= 1; deltaZ++) {
+			for(int deltaY = -1; deltaY <= 1; deltaY++) {
+				for(int deltaX = -1; deltaX <= 1; deltaX++) {
+					tempz = (imcz + deltaZ + cellN)%(cellN);
+					tempy = (imcy + deltaY + cellN)%(cellN);
+					tempx = (imcx + deltaX + cellN)%(cellN);
+					
+					index = tempz * ncell*ncell + tempy * ncell + tempx;
+
+					j = cells[index];					
+
+					while(j != -1 && j > i+2) {
+						displacement = displacementBead +  j - 2 - i;
+
+						itype = itype_lj_tot[displacement];
+						jtype = jtype_lj_tot[displacement];
+
+						if (lg_tot_pdb_dist[displacement] < rcut_nat[itype][jtype]) {
+							nnl_att++;
+
+							ibead_neighbor_list_att[nnl_att] = ibead_lj_tot[displacement];
+							jbead_neighbor_list_att[nnl_att] = jbead_lj_tot[displacement];
+							itype_neighbor_list_att[nnl_att] = itype;
+							jtype_neighbor_list_att[nnl_att] = jtype;
+
+							nl_lj_nat_pdb_dist[nnl_att] = lg_tot_pdb_dist[displacement];
+							nl_lj_nat_pdb_dist2[nnl_att] = lg_tot_pdb_dist2[displacement];
+							nl_lj_nat_pdb_dist6[nnl_att] = lg_tot_pdb_dist6[displacement];
+							nl_lj_nat_pdb_dist12[nnl_att] = lg_tot_pdb_dist12[displacement];
+
+						}
+						else {
+							nnl_rep++;
+							
+							ibead_neighbor_list_rep[nnl_rep] = ibead_lj_tot[displacement];
+							jbead_neighbor_list_rep[nnl_rep] = jbead_lj_tot[displacement];
+							itype_neighbor_list_rep[nnl_rep] = itype;
+							jtype_neighbor_list_rep[nnl_rep] = jtype;
+							
+						}
+						j = beadLinks[j];
+					}					
+				}
+			}		
+		}
+	}
+}
+
 void update_cell_array2() {
 	int imcx, imcy, imcz, index;
 	int itype, jtype, j, displacementBead, displacement;
