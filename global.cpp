@@ -211,7 +211,6 @@ pot_term_Ptr pot_term[mpot_term+1];
 
 double e_bnd,e_ang,e_tor,e_stack,e_elec,e_ang_ss;
 double e_vdw_rr,e_vdw_rr_att,e_vdw_rr_rep;
-double e_vdw_cc,e_vdw_rc,e_vdw_rc_rep,e_vdw_rc_att;
 double rna_etot,system_etot;
 double chi;
 double Q;
