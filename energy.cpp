@@ -14,7 +14,7 @@ void energy_eval()
   }
 
   rna_etot = e_bnd + e_ang_ss + e_vdw_rr;
-  system_etot = rna_etot + e_vdw_rc + e_vdw_cc;
+  system_etot = rna_etot;
 
 }
 
@@ -199,8 +199,6 @@ void vdw_energy()
   e_vdw_rr = 0.0;
   e_vdw_rr_att = 0.0;
   e_vdw_rr_rep = 0.0;
-  e_vdw_cc = 0.0;
-  e_vdw_rc = 0.0;
 
   for( int i=1; i<=nil_att; i++ ) {
 

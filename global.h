@@ -211,7 +211,6 @@ extern double sigma_ss6;
 extern double epsilon_ss;
 extern double e_bnd,e_ang,e_tor,e_stack,e_elec,e_ang_ss;
 extern double e_vdw_rr,e_vdw_rr_att,e_vdw_rr_rep;
-extern double e_vdw_cc,e_vdw_rc,e_vdw_rc_rep,e_vdw_rc_att;
 extern double rna_etot,system_etot;
 
 
