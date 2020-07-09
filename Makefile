@@ -1,4 +1,4 @@
-CC = g++ -O3
+CC = nvcc -O3
 
 EFILE = ./sop.x
 OBJS = ./sop.o ./random_generator.o ./global.o ./energy.o ./io.o ./params.o ./neighbor_list.o ./cell_list.o
@@ -8,7 +8,7 @@ sop.x: $(OBJS)
 	$(CC) -o $(EFILE) $(OBJS)
 
 sop.o: ./sop.h ./random_generator.h ./global.h ./energy.h ./io.h ./params.h ./neighbor_list.h ./cell_list.o
-	$(CC) -c ./sop.cpp -o ./sop.o
+	$(CC) -c ./sop.cu -o ./sop.o
 
 random_generator.o: ./random_generator.h
 	$(CC) -c ./random_generator.cpp -o ./random_generator.o
@@ -26,7 +26,7 @@ params.o: ./global.h ./params.h
 		$(CC) -c ./params.cpp -o ./params.o
 
 neighbor_list.o: ./global.h ./neighbor_list.h
-		$(CC) -c ./neighbor_list.cpp -o ./neighbor_list.o
+		$(CC) -c ./neighbor_list.cu -o ./neighbor_list.o
 
 cell_list.o: ./global.h ./cell_list.h
 		$(CC) -c ./cell_list.cpp -o ./cell_list.o
