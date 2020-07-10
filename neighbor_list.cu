@@ -199,20 +199,20 @@ void update_neighbor_list(){
     free(value);
 }
 
-void calculate_array_native(int *&ibead_lj_nat, int *&jbead_lj_nat, int *&itype_lj_nat, int *&jtype_lj_nat, coord *&unc_pos, double *&lj_nat_pdb_dist, 
+void calculate_array_native(int *&ibead_lj_nat, int *&jbead_lj_nat, int *&itype_lj_nat, int *&jtype_lj_nat, float3 *&unc_pos, double *&lj_nat_pdb_dist, 
                             int *&value, int boxl, int N){
 							
 	// Calculate array sizes
 	int size_int = N*sizeof(int);
 	int size_double = N*sizeof(double);
-	int size_coord = nbead*sizeof(coord);
+	int size_float3 = nbead*sizeof(float3);
 	
 	// Declare device pointers
 	int *dev_ibead_lj_nat;
 	int *dev_jbead_lj_nat;
 	int *dev_itype_lj_nat;
 	int *dev_jtype_lj_nat;
-	coord *dev_unc_pos;
+	float3 *dev_unc_pos;
 	double *dev_lj_nat_pdb_dist; 
 	int *dev_value;
 	
@@ -221,7 +221,7 @@ void calculate_array_native(int *&ibead_lj_nat, int *&jbead_lj_nat, int *&itype_
 	cudaMalloc((void **)&dev_jbead_lj_nat, size_int);
 	cudaMalloc((void **)&dev_itype_lj_nat, size_int);
 	cudaMalloc((void **)&dev_jtype_lj_nat, size_int);
-	cudaMalloc((void **)&dev_unc_pos, size_coord);
+	cudaMalloc((void **)&dev_unc_pos, size_float3);
 	cudaMalloc((void **)&dev_lj_nat_pdb_dist, size_double);
 	cudaMalloc((void **)&dev_value, size_int);
 	
@@ -230,7 +230,7 @@ void calculate_array_native(int *&ibead_lj_nat, int *&jbead_lj_nat, int *&itype_
 	cudaMemcpy(dev_jbead_lj_nat, jbead_lj_nat, size_int, cudaMemcpyHostToDevice);
 	cudaMemcpy(dev_itype_lj_nat, itype_lj_nat, size_int, cudaMemcpyHostToDevice);
 	cudaMemcpy(dev_jtype_lj_nat, jtype_lj_nat, size_int, cudaMemcpyHostToDevice);
-	cudaMemcpy(dev_unc_pos, unc_pos, size_coord, cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_unc_pos, unc_pos, size_float3, cudaMemcpyHostToDevice);
 	cudaMemcpy(dev_lj_nat_pdb_dist, lj_nat_pdb_dist, size_double, cudaMemcpyHostToDevice);
     cudaMemcpy(dev_value, value, size_int, cudaMemcpyHostToDevice);
 	
@@ -257,8 +257,8 @@ void calculate_array_native(int *&ibead_lj_nat, int *&jbead_lj_nat, int *&itype_
 	cudaFree(dev_value);
 }
 
-__global__ void array_native_kernel(int *&dev_ibead_lj_nat, int *&dev_jbead_lj_nat, int *&dev_itype_lj_nat, int *&dev_jtype_lj_nat, coord *&dev_unc_pos, double *&dev_lj_nat_pdb_dist, 
-                            int *dev_value, int boxl, int N){
+__global__ void array_native_kernel(int *&dev_ibead_lj_nat, int *&dev_jbead_lj_nat, int *&dev_itype_lj_nat, int *&dev_jtype_lj_nat, float3 *&dev_unc_pos, double *&dev_lj_nat_pdb_dist, 
+                            int *&dev_value, int boxl, int N){
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   if(i > 0 && i < N){
     double dx, dy, dz;
@@ -315,20 +315,20 @@ __global__ void array_native_kernel(int *&dev_ibead_lj_nat, int *&dev_jbead_lj_n
   }
 }
 
-void calculate_array_non_native(int *&ibead_lj_non_nat, int *&jbead_lj_non_nat, int *&itype_lj_non_nat, int *&jtype_lj_non_nat, coord *&unc_pos,
+void calculate_array_non_native(int *&ibead_lj_non_nat, int *&jbead_lj_non_nat, int *&itype_lj_non_nat, int *&jtype_lj_non_nat, float3 *&unc_pos,
                             int *&value, int boxl, int N){
 							
 	// Calculate array sizes
 	int size_int = N*sizeof(int);
 	int size_double = N*sizeof(double);
-	int size_coord = nbead*sizeof(coord);
+	int size_float3 = nbead*sizeof(float3);
 	
 	// Declare device pointers
 	int *dev_ibead_lj_non_nat;
 	int *dev_jbead_lj_non_nat;
 	int *dev_itype_lj_non_nat;
 	int *dev_jtype_lj_non_nat;
-	coord *dev_unc_pos; 
+	float3 *dev_unc_pos; 
 	int *dev_value;
 	
 	// Allocate device arrays
@@ -336,7 +336,7 @@ void calculate_array_non_native(int *&ibead_lj_non_nat, int *&jbead_lj_non_nat, 
 	cudaMalloc((void **)&dev_jbead_lj_non_nat, size_int);
 	cudaMalloc((void **)&dev_itype_lj_non_nat, size_int);
 	cudaMalloc((void **)&dev_jtype_lj_non_nat, size_int);
-	cudaMalloc((void **)&dev_unc_pos, size_coord);
+	cudaMalloc((void **)&dev_unc_pos, size_float3);
 	cudaMalloc((void **)&dev_value, size_int);
 	
 	// Copy host arrays to device arrays
@@ -344,7 +344,7 @@ void calculate_array_non_native(int *&ibead_lj_non_nat, int *&jbead_lj_non_nat, 
 	cudaMemcpy(dev_jbead_lj_non_nat, jbead_lj_non_nat, size_int, cudaMemcpyHostToDevice);
 	cudaMemcpy(dev_itype_lj_non_nat, itype_lj_non_nat, size_int, cudaMemcpyHostToDevice);
 	cudaMemcpy(dev_jtype_lj_non_nat, jtype_lj_non_nat, size_int, cudaMemcpyHostToDevice);
-	cudaMemcpy(dev_unc_pos, unc_pos, size_coord, cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_unc_pos, unc_pos, size_float3, cudaMemcpyHostToDevice);
 	cudaMemcpy(dev_value, value, size_int, cudaMemcpyHostToDevice);
 	
 	// Calculate block/thread count
@@ -371,8 +371,8 @@ void calculate_array_non_native(int *&ibead_lj_non_nat, int *&jbead_lj_non_nat, 
 }
 
 __global__ void array_non_native_kernel(int *&dev_ibead_lj_non_nat, int *&dev_jbead_lj_non_nat, int *&dev_itype_lj_non_nat, int *&dev_jtype_lj_non_nat, 
-                                        coord *&dev_unc_pos, int *dev_value, int boxl, int N){
-int i = blockIdx.x * blockDim.x + threadIdx.x;
+                                        float3 *&dev_unc_pos, int *&dev_value, int boxl, int N){
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
   if(i > 0 && i < N){
     double dx, dy, dz;
     double d2;
