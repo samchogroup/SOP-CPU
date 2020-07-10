@@ -130,11 +130,11 @@ extern double e_vdw_rr_rep;
 extern int nbead;
 extern int ncrowder;
 extern int nbead_tot;
-extern coord* pos;
-extern coord* unc_pos;
-extern coord* vel;
-extern coord* force;
-extern coord* natpos; // native position vectors
+extern float3* pos;
+extern float3* unc_pos;
+extern float3* vel;
+extern float3* force;
+extern float3* natpos; // native position vectors
 extern int pos_allocated;
 extern int unc_pos_allocated;
 extern int vel_allocated;
