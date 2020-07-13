@@ -76,7 +76,8 @@ void update_neighbor_list_gpu() {
       nl_lj_nat_pdb_dist6[nnl_att] = lj_nat_pdb_dist6[i];
       nl_lj_nat_pdb_dist12[nnl_att] = lj_nat_pdb_dist12[i];
     }
-  }  
+  }
+
 
   // calculations for non-native (repulsive) contacts
   for (int i=1; i<=ncon_rep; i++) {
@@ -143,9 +144,16 @@ void update_neighbor_list(){
 
 	// Compact ibead_neighbor_list_att
 	compact(ibead_lj_nat, value, N, ibead_neighbor_list_att);
+
+    /*
+    for(int i = 0; i < N; i++){
+        printf("%d\n", ibead_neighbor_list_att[i]);
+    }
+    fflush(stdout);
+    exit(0);*/
 	
 	// Compact jbead_neighbor_list_att
-	compact(jbead_lj_nat, value, N, jbead_neighbor_list_att);
+	nnl_att = compact(jbead_lj_nat, value, N, jbead_neighbor_list_att);
 	
 	// Compact itype_neighbor_list_att
 	compact(itype_lj_nat, value, N, itype_neighbor_list_att);
@@ -186,7 +194,7 @@ void update_neighbor_list(){
 	calculate_array_non_native(ibead_lj_non_nat, jbead_lj_non_nat, itype_lj_non_nat, jtype_lj_non_nat, unc_pos, value, boxl, N);
 	
 	// Compact ibead_neighbor_list_rep
-	compact(ibead_lj_non_nat, value, N, ibead_neighbor_list_rep);
+	nnl_rep = compact(ibead_lj_non_nat, value, N, ibead_neighbor_list_rep);
 	
 	// Compact jbead_neighbor_list_rep
 	compact(jbead_lj_non_nat, value, N, jbead_neighbor_list_rep);
@@ -371,7 +379,7 @@ void calculate_array_non_native(int *ibead_lj_non_nat, int *jbead_lj_non_nat, in
 	// Calculate array sizes
 	int size_int = N*sizeof(int);
 	int size_double = N*sizeof(double);
-	int size_float3 = nbead*sizeof(float3);
+	int size_float3 = (nbead+1)*sizeof(float3);
 	
 	// Declare device pointers
 	int *dev_ibead_lj_non_nat;
@@ -866,6 +874,7 @@ __global__ void sumIt (int *Y, int *S, int InputSize) {
     }
 }
 
+/*
 __global__ void dummy(int *dev_ibead_lj_nat, int *dev_jbead_lj_nat, int *dev_itype_lj_nat, int *dev_jtype_lj_nat, float3 *dev_unc_pos, double *dev_lj_nat_pdb_dist, 
                             int *&dev_value, int boxl, int N, int nbead){
   int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -893,18 +902,18 @@ __global__ void dummy(int *dev_ibead_lj_nat, int *dev_jbead_lj_nat, int *dev_ity
     jtype = dev_jtype_lj_nat[i];
     //printf("dev_jtype_lj_nat[%d]", i);
     
-    /*
+    
     if(ibead > nbead+1){
         printf("ibead: %d\n", i);
     }else if(jbead > nbead+1){
         printf("jbead: %d\n", i);
-    }*/
+    }
     
     
     // calculate distance in x, y, and z for ibead and jbead
     dx = dev_unc_pos[jbead].x - dev_unc_pos[ibead].x;
     printf("dev_unc_pos[%d].x - dev_unc_pos[%d].x", jbead, ibead);
-    /*
+    
     dy = dev_unc_pos[jbead].y - dev_unc_pos[ibead].y;
     printf("dev_unc_pos[%d].y - dev_unc_pos[%d].y", jbead, ibead);
 
@@ -940,6 +949,7 @@ __global__ void dummy(int *dev_ibead_lj_nat, int *dev_jbead_lj_nat, int *dev_ity
     }else{
       dev_value[i] = 0;
     }
-    */
+    
   }
 }
+*/
