@@ -14,7 +14,7 @@ __device__ __constant__ double dev_sigma_rep[3][3] = {
 	{0.0, 5.4, 7.0}
 };
 
-void update_neighbor_list() {
+void update_neighbor_list_gpu() {
 
   double dx, dy, dz;
   double d2;
@@ -131,7 +131,7 @@ void update_neighbor_list() {
   fflush(stdout);
 }
 
-void update_neighbor_list_gpu(){
+void update_neighbor_list(){
  	// Declare N
 	int N;
 	
@@ -148,7 +148,7 @@ void update_neighbor_list_gpu(){
     N--;
 
 	// Compact ibead_neighbor_list_att
-	nnl_att = compact(ibead_lj_nat+1, value, N, ibead_neighbor_list_att);
+	nnl_att = compact(ibead_lj_nat+1, value+1, N, ibead_neighbor_list_att);
     printf("%d\n", nnl_att);
     fflush(stdout);
 
@@ -160,25 +160,25 @@ void update_neighbor_list_gpu(){
     exit(0);*/
 	
 	// Compact jbead_neighbor_list_att
-	compact(jbead_lj_nat+1, value, N, jbead_neighbor_list_att);
+	compact(jbead_lj_nat+1, value+1, N, jbead_neighbor_list_att);
 	
 	// Compact itype_neighbor_list_att
-	compact(itype_lj_nat+1, value, N, itype_neighbor_list_att);
+	compact(itype_lj_nat+1, value+1, N, itype_neighbor_list_att);
 	
 	// Compact jtype_neighbor_list_att
-	compact(jtype_lj_nat+1, value, N, jtype_neighbor_list_att);
+	compact(jtype_lj_nat+1, value+1, N, jtype_neighbor_list_att);
 	
 	// Compact nl_lj_nat_pdb_dist
-	compact(lj_nat_pdb_dist+1, value, N, nl_lj_nat_pdb_dist);
+	compact(lj_nat_pdb_dist+1, value+1, N, nl_lj_nat_pdb_dist);
 	
 	// Compact nl_lj_nat_pdb_dist2
-	compact(lj_nat_pdb_dist2+1, value, N, nl_lj_nat_pdb_dist2);
+	compact(lj_nat_pdb_dist2+1, value+1, N, nl_lj_nat_pdb_dist2);
 	
 	// Compact nl_lj_nat_pdb_dist6
-	compact(lj_nat_pdb_dist6+1, value, N, nl_lj_nat_pdb_dist6);
+	compact(lj_nat_pdb_dist6+1, value+1, N, nl_lj_nat_pdb_dist6);
 	
 	// Compact nl_lj_nat_pdb_dist12
-	compact(lj_nat_pdb_dist12+1, value, N, nl_lj_nat_pdb_dist12);
+	compact(lj_nat_pdb_dist12+1, value+1, N, nl_lj_nat_pdb_dist12);
 	
 	// Free value memory
 	free(value);
@@ -203,18 +203,18 @@ void update_neighbor_list_gpu(){
     N--;
 
 	// Compact ibead_neighbor_list_rep
-	nnl_rep = compact(ibead_lj_non_nat+1, value, N, ibead_neighbor_list_rep);
+	nnl_rep = compact(ibead_lj_non_nat+1, value+1, N, ibead_neighbor_list_rep);
     printf("%d\n", nnl_rep);
     fflush(stdout);
 	
 	// Compact jbead_neighbor_list_rep
-	compact(jbead_lj_non_nat+1, value, N, jbead_neighbor_list_rep);
+	compact(jbead_lj_non_nat+1, value+1, N, jbead_neighbor_list_rep);
 	
 	// Compact itype_neighbor_list_rep
-	compact(itype_lj_non_nat+1, value, N, itype_neighbor_list_rep);
+	compact(itype_lj_non_nat+1, value+1, N, itype_neighbor_list_rep);
 	
 	// Compact jtype_neighbor_list_rep
-	compact(itype_lj_non_nat+1, value, N, itype_neighbor_list_rep);
+	compact(itype_lj_non_nat+1, value+1, N, itype_neighbor_list_rep);
 
     free(value);
 }
