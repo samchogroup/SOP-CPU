@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include "neighbor_list.h"
 #include "global.h"
+#include <vector_types.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -58,6 +59,7 @@ void update_neighbor_list_gpu() {
 
     // checks if distance squared is less than the cutoff distance squared
     if (d2 < rcut2) {
+      printf("%d\n", 1);
       // add to neighbor list
       nnl_att++;
       // add pair to respective attraction neighbor lists
@@ -74,7 +76,7 @@ void update_neighbor_list_gpu() {
       nl_lj_nat_pdb_dist6[nnl_att] = lj_nat_pdb_dist6[i];
       nl_lj_nat_pdb_dist12[nnl_att] = lj_nat_pdb_dist12[i];
     }
-  }
+  }  
 
   // calculations for non-native (repulsive) contacts
   for (int i=1; i<=ncon_rep; i++) {
@@ -122,7 +124,6 @@ void update_neighbor_list_gpu() {
       itype_neighbor_list_rep[nnl_rep] = itype;
       jtype_neighbor_list_rep[nnl_rep] = jtype;
     }
-
   }
 }
 
@@ -139,7 +140,7 @@ void update_neighbor_list(){
 	
 	// Calculate binary list for att
 	calculate_array_native(ibead_lj_nat, jbead_lj_nat, itype_lj_nat, jtype_lj_nat, unc_pos, lj_nat_pdb_dist, value, boxl, N);
-	
+
 	// Compact ibead_neighbor_list_att
 	compact(ibead_lj_nat, value, N, ibead_neighbor_list_att);
 	
@@ -199,13 +200,13 @@ void update_neighbor_list(){
     free(value);
 }
 
-void calculate_array_native(int *&ibead_lj_nat, int *&jbead_lj_nat, int *&itype_lj_nat, int *&jtype_lj_nat, float3 *&unc_pos, double *&lj_nat_pdb_dist, 
-                            int *&value, int boxl, int N){
+void calculate_array_native(int *ibead_lj_nat, int *jbead_lj_nat, int *itype_lj_nat, int *jtype_lj_nat, float3 *unc_pos, double *lj_nat_pdb_dist, 
+                            int *value, int boxl, int N){
 							
 	// Calculate array sizes
 	int size_int = N*sizeof(int);
 	int size_double = N*sizeof(double);
-	int size_float3 = nbead*sizeof(float3);
+	int size_float3 = (nbead+1)*sizeof(float3);
 	
 	// Declare device pointers
 	int *dev_ibead_lj_nat;
@@ -232,21 +233,66 @@ void calculate_array_native(int *&ibead_lj_nat, int *&jbead_lj_nat, int *&itype_
 	cudaMemcpy(dev_jtype_lj_nat, jtype_lj_nat, size_int, cudaMemcpyHostToDevice);
 	cudaMemcpy(dev_unc_pos, unc_pos, size_float3, cudaMemcpyHostToDevice);
 	cudaMemcpy(dev_lj_nat_pdb_dist, lj_nat_pdb_dist, size_double, cudaMemcpyHostToDevice);
-    cudaMemcpy(dev_value, value, size_int, cudaMemcpyHostToDevice);
+    cudaDeviceSynchronize();
 	
 	// Calculate block/thread count
 	int threads = (int)min(N, SECTION_SIZE);
     int blocks = (int)ceil(1.0*N/SECTION_SIZE);
+
+    //dummy<<<blocks, threads>>>(dev_ibead_lj_nat, dev_jbead_lj_nat, dev_itype_lj_nat, dev_jtype_lj_nat, dev_unc_pos, dev_lj_nat_pdb_dist, dev_value, boxl, N, nbead);
+    
+    /*
+    for(int i = 0; i < N; i++){
+        printf("i: %d  j: %d\n",ibead_lj_nat[i],jbead_lj_nat[i]);
+        float3 a = unc_pos[ibead_lj_nat[i]];
+        printf("%d: x=%f, y=%f, z=%f\n", ibead_lj_nat[i], a.x, a.y, a.z);
+        
+        a = unc_pos[jbead_lj_nat[i]];
+        printf("%d: x=%f, y=%f, z=%f\n", jbead_lj_nat[i], a.x, a.y, a.z);
+    }
+    
+    int *test_ibead_lj_nat = (int *)malloc(size_int);
+    int *test_jbead_lj_nat = (int *)malloc(size_int);
+    float3 *test_unc_pos = (float3 *)malloc(size_float3);
+    
+    cudaMemcpy(test_ibead_lj_nat, dev_ibead_lj_nat, size_int, cudaMemcpyDeviceToHost);
+	cudaMemcpy(test_jbead_lj_nat, dev_jbead_lj_nat, size_int, cudaMemcpyDeviceToHost);
+    cudaMemcpy(test_unc_pos, dev_unc_pos, size_float3, cudaMemcpyDeviceToHost);
+    
+    for(int i = 0; i < N; i++){
+        if(i > 0 && i < N){
+            if(ibead_lj_nat[i] != test_ibead_lj_nat[i] || jbead_lj_nat[i] != test_jbead_lj_nat[i] || unc_pos[ibead_lj_nat[i]].x != test_unc_pos[test_ibead_lj_nat[i]].x ||
+            unc_pos[ibead_lj_nat[i]].y != test_unc_pos[test_ibead_lj_nat[i]].y || unc_pos[ibead_lj_nat[i]].z != test_unc_pos[test_ibead_lj_nat[i]].z || 
+            unc_pos[jbead_lj_nat[i]].x != test_unc_pos[test_jbead_lj_nat[i]].x || unc_pos[jbead_lj_nat[i]].y != test_unc_pos[test_jbead_lj_nat[i]].y ||
+            unc_pos[jbead_lj_nat[i]].z != test_unc_pos[test_jbead_lj_nat[i]].z){
+                printf("i: %d  j: %d\n",ibead_lj_nat[i],jbead_lj_nat[i]);
+                float3 a = unc_pos[ibead_lj_nat[i]];
+                printf("%d: x=%f, y=%f, z=%f\n", ibead_lj_nat[i], a.x, a.y, a.z);
+                
+                a = unc_pos[jbead_lj_nat[i]];
+                printf("%d: x=%f, y=%f, z=%f\n", jbead_lj_nat[i], a.x, a.y, a.z);
+                
+                printf("test_i: %d  test_j: %d\n",test_ibead_lj_nat[i],test_jbead_lj_nat[i]);
+                a = test_unc_pos[test_ibead_lj_nat[i]];
+                printf("test_%d: x=%f, y=%f, z=%f\n", test_ibead_lj_nat[i], a.x, a.y, a.z);
+                
+                a = test_unc_pos[test_jbead_lj_nat[i]];
+                printf("test_%d: x=%f, y=%f, z=%f\n", test_jbead_lj_nat[i], a.x, a.y, a.z);
+            }
+        }
+    }*/
 	
 	// Compute binary array
 	array_native_kernel<<<blocks, threads>>>(dev_ibead_lj_nat, dev_jbead_lj_nat, dev_itype_lj_nat, dev_jtype_lj_nat, dev_unc_pos, dev_lj_nat_pdb_dist, dev_value, boxl, N);
-	
+
     // Sync device
     cudaDeviceSynchronize();
 
 	// Copy device array to host array
 	cudaMemcpy(value, dev_value, size_int, cudaMemcpyDeviceToHost);
 	
+    cudaDeviceSynchronize();
+
 	// Free GPU memory
 	cudaFree(dev_ibead_lj_nat);
 	cudaFree(dev_jbead_lj_nat);
@@ -257,8 +303,8 @@ void calculate_array_native(int *&ibead_lj_nat, int *&jbead_lj_nat, int *&itype_
 	cudaFree(dev_value);
 }
 
-__global__ void array_native_kernel(int *&dev_ibead_lj_nat, int *&dev_jbead_lj_nat, int *&dev_itype_lj_nat, int *&dev_jtype_lj_nat, float3 *&dev_unc_pos, double *&dev_lj_nat_pdb_dist, 
-                            int *&dev_value, int boxl, int N){
+__global__ void array_native_kernel(int *dev_ibead_lj_nat, int *dev_jbead_lj_nat, int *dev_itype_lj_nat, int *dev_jtype_lj_nat, float3 *dev_unc_pos, double *dev_lj_nat_pdb_dist, 
+                            int *dev_value, int boxl, int N){
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   if(i > 0 && i < N){
     double dx, dy, dz;
@@ -268,15 +314,19 @@ __global__ void array_native_kernel(int *&dev_ibead_lj_nat, int *&dev_jbead_lj_n
 
     // record sigma for ibead and jbead
     ibead = dev_ibead_lj_nat[i];
+
     jbead = dev_jbead_lj_nat[i];
 
     // record type of bead for ibead and jbead
     itype = dev_itype_lj_nat[i];
+
     jtype = dev_jtype_lj_nat[i];
     
     // calculate distance in x, y, and z for ibead and jbead
     dx = dev_unc_pos[jbead].x - dev_unc_pos[ibead].x;
+
     dy = dev_unc_pos[jbead].y - dev_unc_pos[ibead].y;
+
     dz = dev_unc_pos[jbead].z - dev_unc_pos[ibead].z;
 
     // apply periodic boundary conditions to dx, dy, and dz
@@ -315,8 +365,8 @@ __global__ void array_native_kernel(int *&dev_ibead_lj_nat, int *&dev_jbead_lj_n
   }
 }
 
-void calculate_array_non_native(int *&ibead_lj_non_nat, int *&jbead_lj_non_nat, int *&itype_lj_non_nat, int *&jtype_lj_non_nat, float3 *&unc_pos,
-                            int *&value, int boxl, int N){
+void calculate_array_non_native(int *ibead_lj_non_nat, int *jbead_lj_non_nat, int *itype_lj_non_nat, int *jtype_lj_non_nat, float3 *unc_pos,
+                            int *value, int boxl, int N){
 							
 	// Calculate array sizes
 	int size_int = N*sizeof(int);
@@ -354,13 +404,27 @@ void calculate_array_non_native(int *&ibead_lj_non_nat, int *&jbead_lj_non_nat, 
 	// Compute binary array
 	array_non_native_kernel<<<blocks, threads>>>(dev_ibead_lj_non_nat, dev_jbead_lj_non_nat, dev_itype_lj_non_nat, dev_jtype_lj_non_nat, 
                                                 dev_unc_pos, dev_value, boxl, N);
+    /*
+    cudaDeviceSynchronize();
+
+    // check for error
+    cudaError_t error = cudaGetLastError();
+    if(error != cudaSuccess)
+    {
+        // print the CUDA error message and exit
+        printf("CUDA error: %s\n", cudaGetErrorString(error));
+        exit(-1);
+    }else{
+        printf("Success\n");
+        exit(0);
+    }*/
 	
     // Sync device
     cudaDeviceSynchronize();
 
 	// Copy device array to host array
 	cudaMemcpy(value, dev_value, size_int, cudaMemcpyDeviceToHost);
-	
+
 	// Free GPU memory
 	cudaFree(dev_ibead_lj_non_nat);
 	cudaFree(dev_jbead_lj_non_nat);
@@ -370,8 +434,8 @@ void calculate_array_non_native(int *&ibead_lj_non_nat, int *&jbead_lj_non_nat, 
 	cudaFree(dev_value);
 }
 
-__global__ void array_non_native_kernel(int *&dev_ibead_lj_non_nat, int *&dev_jbead_lj_non_nat, int *&dev_itype_lj_non_nat, int *&dev_jtype_lj_non_nat, 
-                                        float3 *&dev_unc_pos, int *&dev_value, int boxl, int N){
+__global__ void array_non_native_kernel(int *dev_ibead_lj_non_nat, int *dev_jbead_lj_non_nat, int *dev_itype_lj_non_nat, int *dev_jtype_lj_non_nat, 
+                                        float3 *dev_unc_pos, int *dev_value, int boxl, int N){
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   if(i > 0 && i < N){
     double dx, dy, dz;
@@ -443,7 +507,7 @@ __global__ void array_non_native_kernel(int *&dev_ibead_lj_non_nat, int *&dev_jb
  *           Note: result is modified in-place
  */
 
-int compact(int *&index, int *&value, int N, int *&result){
+int compact(int *index, int *value, int N, int *&result){
     // Declare pointers for dev_output and dev_value arrays
     int *dev_output;
     int *dev_value;
@@ -537,7 +601,7 @@ __global__ void copyElements(int *dev_index, int *dev_value, int *dev_output, in
     return;
 }
 
-int compact(double *&index, int *&value, int N, double *&result){
+int compact(double *index, int *value, int N, double *&result){
     // Declare pointers for dev_output and dev_value arrays
     int *dev_output;
     int *dev_value;
@@ -798,4 +862,82 @@ __global__ void sumIt (int *Y, int *S, int InputSize) {
             Y[i] += S[blockIdx.x-1];
         }
     }
+}
+
+__global__ void dummy(int *dev_ibead_lj_nat, int *dev_jbead_lj_nat, int *dev_itype_lj_nat, int *dev_jtype_lj_nat, float3 *dev_unc_pos, double *dev_lj_nat_pdb_dist, 
+                            int *&dev_value, int boxl, int N, int nbead){
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  if(i > 0 && i < N){
+    double dx, dy, dz;
+    double d2;
+    int ibead, jbead, itype, jtype;
+    double rcut, rcut2;
+
+    if(i >= N){
+        printf("%d\n", i);
+    }
+
+    // record sigma for ibead and jbead
+    ibead = dev_ibead_lj_nat[i];
+    //printf("dev_ibead_lj_nat[%d]", i);
+    
+    jbead = dev_jbead_lj_nat[i];
+    //printf("dev_jbead_lj_nat[%d]", i);
+    
+    // record type of bead for ibead and jbead
+    itype = dev_itype_lj_nat[i];
+    //printf("dev_itype_lj_nat[%d]", i);
+    
+    jtype = dev_jtype_lj_nat[i];
+    //printf("dev_jtype_lj_nat[%d]", i);
+    
+    /*
+    if(ibead > nbead+1){
+        printf("ibead: %d\n", i);
+    }else if(jbead > nbead+1){
+        printf("jbead: %d\n", i);
+    }*/
+    
+    
+    // calculate distance in x, y, and z for ibead and jbead
+    dx = dev_unc_pos[jbead].x - dev_unc_pos[ibead].x;
+    printf("dev_unc_pos[%d].x - dev_unc_pos[%d].x", jbead, ibead);
+    /*
+    dy = dev_unc_pos[jbead].y - dev_unc_pos[ibead].y;
+    printf("dev_unc_pos[%d].y - dev_unc_pos[%d].y", jbead, ibead);
+
+    dz = dev_unc_pos[jbead].z - dev_unc_pos[ibead].z;
+    printf("dev_unc_pos[%d].z - dev_unc_pos[%d].z", jbead, ibead);
+
+    // apply periodic boundary conditions to dx, dy, and dz
+    //dx -= boxl*rnd(dx/boxl);
+    double rnd_value;
+
+    rnd_value = ( ((dx/boxl)>0) ? std::floor((dx/boxl)+0.5) : std::ceil((dx/boxl)-0.5) );
+    dx -= boxl*rnd_value;
+
+    //dy -= boxl*rnd(dy/boxl);
+    rnd_value = ( ((dy/boxl)>0) ? std::floor((dy/boxl)+0.5) : std::ceil((dy/boxl)-0.5) );
+    dy -= boxl*rnd_value;
+
+    //dz -= boxl*rnd(dz/boxl);
+    rnd_value = ( ((dz/boxl)>0) ? std::floor((dz/boxl)+0.5) : std::ceil((dz/boxl)-0.5) );
+    dz -= boxl*rnd_value;
+
+    // compute square of distance between ibead and jbead
+    d2 = dx*dx+dy*dy+dz*dz;
+
+    rcut = 3.2*dev_lj_nat_pdb_dist[i];
+    printf("dev_lj_nat_pdb_dist[%d]", i);
+
+    // square cutoff distance, since sqrt(d2) is computationally expensive
+    rcut2 = rcut*rcut;
+
+    if(d2 < rcut2){
+      dev_value[i] = 1;
+    }else{
+      dev_value[i] = 0;
+    }
+    */
+  }
 }
