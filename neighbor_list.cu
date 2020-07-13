@@ -568,7 +568,9 @@ int compact(int *index, int *value, int N, int *&result){
     cudaDeviceSynchronize();
 
     // Allocate result array on host
-    result = (int *)malloc(arrSize*sizeof(int));
+    //result = (int *)malloc(arrSize*sizeof(int));
+    free(result);
+    result = (int *)malloc(size);
 
     // Copy dev_result (compacted array of indices in GPU) to result array on host
     cudaMemcpy(result, dev_result, arrSize*sizeof(int), cudaMemcpyDeviceToHost); 
@@ -662,7 +664,9 @@ int compact(double *index, int *value, int N, double *&result){
     cudaDeviceSynchronize();
 
     // Allocate result array on host
-    result = (double *)malloc(arrSize*sizeof(double));
+    //result = (double *)malloc(arrSize*sizeof(double));
+    free(result);
+    result = (double *)malloc(size);
 
     // Copy dev_result (compacted array of indices in GPU) to result array on host
     cudaMemcpy(result, dev_result, arrSize*sizeof(double), cudaMemcpyDeviceToHost); 
