@@ -14,7 +14,7 @@ __device__ __constant__ double dev_sigma_rep[3][3] = {
 	{0.0, 5.4, 7.0}
 };
 
-void update_neighbor_list_gpu() {
+void update_neighbor_list() {
 
   double dx, dy, dz;
   double d2;
@@ -59,7 +59,6 @@ void update_neighbor_list_gpu() {
 
     // checks if distance squared is less than the cutoff distance squared
     if (d2 < rcut2) {
-      printf("%d\n", 1);
       // add to neighbor list
       nnl_att++;
       // add pair to respective attraction neighbor lists
@@ -77,6 +76,8 @@ void update_neighbor_list_gpu() {
       nl_lj_nat_pdb_dist12[nnl_att] = lj_nat_pdb_dist12[i];
     }
   }
+  printf("%d\n", nnl_att);
+  fflush(stdout);
 
 
   // calculations for non-native (repulsive) contacts
@@ -126,9 +127,11 @@ void update_neighbor_list_gpu() {
       jtype_neighbor_list_rep[nnl_rep] = jtype;
     }
   }
+  printf("%d\n", nnl_rep);
+  fflush(stdout);
 }
 
-void update_neighbor_list(){
+void update_neighbor_list_gpu(){
  	// Declare N
 	int N;
 	
@@ -142,8 +145,12 @@ void update_neighbor_list(){
 	// Calculate binary list for att
 	calculate_array_native(ibead_lj_nat, jbead_lj_nat, itype_lj_nat, jtype_lj_nat, unc_pos, lj_nat_pdb_dist, value, boxl, N);
 
+    N--;
+
 	// Compact ibead_neighbor_list_att
-	compact(ibead_lj_nat, value, N, ibead_neighbor_list_att);
+	nnl_att = compact(ibead_lj_nat+1, value, N, ibead_neighbor_list_att);
+    printf("%d\n", nnl_att);
+    fflush(stdout);
 
     /*
     for(int i = 0; i < N; i++){
@@ -153,25 +160,25 @@ void update_neighbor_list(){
     exit(0);*/
 	
 	// Compact jbead_neighbor_list_att
-	nnl_att = compact(jbead_lj_nat, value, N, jbead_neighbor_list_att);
+	compact(jbead_lj_nat+1, value, N, jbead_neighbor_list_att);
 	
 	// Compact itype_neighbor_list_att
-	compact(itype_lj_nat, value, N, itype_neighbor_list_att);
+	compact(itype_lj_nat+1, value, N, itype_neighbor_list_att);
 	
 	// Compact jtype_neighbor_list_att
-	compact(jtype_lj_nat, value, N, jtype_neighbor_list_att);
+	compact(jtype_lj_nat+1, value, N, jtype_neighbor_list_att);
 	
 	// Compact nl_lj_nat_pdb_dist
-	compact(lj_nat_pdb_dist, value, N, nl_lj_nat_pdb_dist);
+	compact(lj_nat_pdb_dist+1, value, N, nl_lj_nat_pdb_dist);
 	
 	// Compact nl_lj_nat_pdb_dist2
-	compact(lj_nat_pdb_dist2, value, N, nl_lj_nat_pdb_dist2);
+	compact(lj_nat_pdb_dist2+1, value, N, nl_lj_nat_pdb_dist2);
 	
 	// Compact nl_lj_nat_pdb_dist6
-	compact(lj_nat_pdb_dist6, value, N, nl_lj_nat_pdb_dist6);
+	compact(lj_nat_pdb_dist6+1, value, N, nl_lj_nat_pdb_dist6);
 	
 	// Compact nl_lj_nat_pdb_dist12
-	compact(lj_nat_pdb_dist12, value, N, nl_lj_nat_pdb_dist12);
+	compact(lj_nat_pdb_dist12+1, value, N, nl_lj_nat_pdb_dist12);
 	
 	// Free value memory
 	free(value);
@@ -193,17 +200,21 @@ void update_neighbor_list(){
 	// Calculate binary list for rep
 	calculate_array_non_native(ibead_lj_non_nat, jbead_lj_non_nat, itype_lj_non_nat, jtype_lj_non_nat, unc_pos, value, boxl, N);
 	
+    N--;
+
 	// Compact ibead_neighbor_list_rep
-	nnl_rep = compact(ibead_lj_non_nat, value, N, ibead_neighbor_list_rep);
+	nnl_rep = compact(ibead_lj_non_nat+1, value, N, ibead_neighbor_list_rep);
+    printf("%d\n", nnl_rep);
+    fflush(stdout);
 	
 	// Compact jbead_neighbor_list_rep
-	compact(jbead_lj_non_nat, value, N, jbead_neighbor_list_rep);
+	compact(jbead_lj_non_nat+1, value, N, jbead_neighbor_list_rep);
 	
 	// Compact itype_neighbor_list_rep
-	compact(itype_lj_non_nat, value, N, itype_neighbor_list_rep);
+	compact(itype_lj_non_nat+1, value, N, itype_neighbor_list_rep);
 	
 	// Compact jtype_neighbor_list_rep
-	compact(itype_lj_non_nat, value, N, itype_neighbor_list_rep);
+	compact(itype_lj_non_nat+1, value, N, itype_neighbor_list_rep);
 
     free(value);
 }
