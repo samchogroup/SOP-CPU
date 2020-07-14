@@ -14,7 +14,7 @@ __device__ __constant__ double dev_sigma_rep[3][3] = {
 	{0.0, 5.4, 7.0}
 };
 
-void update_neighbor_list_gpu() {
+void update_neighbor_list() {
 
   double dx, dy, dz;
   double d2;
@@ -25,7 +25,7 @@ void update_neighbor_list_gpu() {
   nnl_rep = 0;
 
   // calculations for native (attractiction) contacts
-  for (int i=1; i<=ncon_att; i++) {
+  for (int i=0; i<ncon_att; i++) {
     // record sigma for ibead and jbead
     ibead = ibead_lj_nat[i];
     jbead = jbead_lj_nat[i];
@@ -81,7 +81,7 @@ void update_neighbor_list_gpu() {
 
 
   // calculations for non-native (repulsive) contacts
-  for (int i=1; i<=ncon_rep; i++) {
+  for (int i=0; i<ncon_rep; i++) {
     // record sigma for ibead and jbead
     ibead = ibead_lj_non_nat[i];
     jbead = jbead_lj_non_nat[i];
@@ -131,7 +131,7 @@ void update_neighbor_list_gpu() {
   fflush(stdout);
 }
 
-void update_neighbor_list(){
+void update_neighbor_list_gpu(){
  	// Declare N
 	int N;
 	

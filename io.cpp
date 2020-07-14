@@ -164,7 +164,7 @@ void save_coords(char* fname,char* fname2)
 
   ofile.open(fname,ios::out);
   ofile2.open(fname2,ios::out);
-  for( int i=1; i<=nbead; i++ ) {
+  for( int i=0; i<nbead; i++ ) {
     sprintf(oline,"%d %f %f %f",i,pos[i].x,
 	    pos[i].y,pos[i].z);
     ofile << oline << endl;
@@ -191,7 +191,7 @@ void load_coords(char* fname,char* fname2)
   ifile2.clear();
   ifile.open(fname,ios::in);
   ifile2.open(fname2,ios::in);
-  for( int i=1; i<=nbead; i++ ) {
+  for( int i=0; i<nbead; i++ ) {
     ifile.getline(iline,1024);
     tokPtr = strtok(iline," ");
     tokPtr = strtok(NULL," ");
@@ -226,7 +226,7 @@ void load_vels(char* fname)
 
   ifile.clear();
   ifile.open(fname,ios::in);
-  for( int i=1; i<=nbead; i++ ) {
+  for( int i=0; i<nbead; i++ ) {
     ifile.getline(iline,1024);
     tokPtr = strtok(iline," ");
     tokPtr = strtok(NULL," ");
@@ -250,7 +250,7 @@ void save_unccoords(char* fname)
   ofstream ofile;
 
   ofile.open(fname,ios::out);
-  for( int i=1; i<=nbead; i++ ) {
+  for( int i=0; i<nbead; i++ ) {
     sprintf(oline,"%d %f %f %f",i,unc_pos[i].x,
 	    unc_pos[i].y,unc_pos[i].z);
     ofile << oline << endl;
@@ -268,7 +268,7 @@ void save_vels(char* fname)
   ofstream ofile;
 
   ofile.open(fname,ios::out);
-  for( int i=1; i<=nbead; i++ ) {
+  for( int i=0; i<nbead; i++ ) {
     sprintf(oline,"%d %f %f %f",i,vel[i].x,
 	    vel[i].y,vel[i].z);
     ofile << oline << endl;
@@ -290,7 +290,7 @@ void record_traj(char* fname,char* fname2)
   trajfile.open(fname,ios::out | ios::app);
   trajfile2.open(fname2,ios::out | ios::app);
 
-  for( int i=1; i<=nbead; i++ ) {
+  for( int i=0; i<nbead; i++ ) {
     sprintf(oline,"%f %f %f",pos[i].x,pos[i].y,pos[i].z);
     sprintf(oline2,"%f %f %f",unc_pos[i].x,unc_pos[i].y,unc_pos[i].z);
     trajfile << oline << endl;

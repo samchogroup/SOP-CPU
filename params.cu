@@ -134,7 +134,7 @@ void load(int icmd)
     tokPtr = strtok(NULL," ");
     nbnd = atoi(tokPtr); // read in number of bonds
     init_bonds(nbnd);
-    for( int i=1; i<=nbnd; i++ ) {
+    for( int i=0; i<nbnd; i++ ) {
       in.getline(line,2048);
       tokPtr = strtok(line," ");
       ibead_bnd[i] = atoi(tokPtr); // first bead index
@@ -154,7 +154,7 @@ void load(int icmd)
     tokPtr = strtok(NULL," ");
     nang = atoi(tokPtr); // read in number of angles
     init_angles(nang);
-    for( int i=1; i<=nang; i++ ) {
+    for( int i=0; i<nang; i++ ) {
       in.getline(line,2048);
       tokPtr = strtok(line," ");
       ibead_ang[i] = atoi(tokPtr); // first bead index
@@ -182,7 +182,7 @@ void load(int icmd)
     ncon_tot = ncon_att + ncon_rep;
     icon_att = 0;
     icon_rep = 0;
-    for( int i=1; i<=ncon_tot; i++ ) {
+    for( int i=0; i<ncon_tot; i++ ) {
       in.getline(line,2048);
       tokPtr = strtok(line," ");
       ibead = atoi(tokPtr);
@@ -195,7 +195,6 @@ void load(int icmd)
       tokPtr = strtok(NULL," ");
       jtype = atoi(tokPtr);
       if (r_ij < rcut_nat[itype][jtype]) {
-	icon_att++;
 	ibead_lj_nat[icon_att] = ibead;
 	jbead_lj_nat[icon_att] = jbead;
 	itype_lj_nat[icon_att] = itype;
@@ -206,8 +205,8 @@ void load(int icmd)
 	  lj_nat_pdb_dist2[icon_att]*lj_nat_pdb_dist2[icon_att];
 	lj_nat_pdb_dist12[icon_att] = lj_nat_pdb_dist6[icon_att]*
 	  lj_nat_pdb_dist6[icon_att];
+	icon_att++;
 
-	nil_att++;
 	ibead_pair_list_att[nil_att] = ibead;
 	jbead_pair_list_att[nil_att] = jbead;
 	itype_pair_list_att[nil_att] = itype;
@@ -216,18 +215,19 @@ void load(int icmd)
 	pl_lj_nat_pdb_dist2[nil_att] = lj_nat_pdb_dist2[icon_att];
 	pl_lj_nat_pdb_dist6[nil_att] = lj_nat_pdb_dist6[icon_att];
 	pl_lj_nat_pdb_dist12[nil_att] = lj_nat_pdb_dist12[icon_att];
+	nil_att++;
       } else {
-	icon_rep++;
 	ibead_lj_non_nat[icon_rep] = ibead;
 	jbead_lj_non_nat[icon_rep] = jbead;
 	itype_lj_non_nat[icon_rep] = itype;
 	jtype_lj_non_nat[icon_rep] = jtype;
+	icon_rep++;
 
-	nil_rep++;
 	ibead_pair_list_rep[nil_rep] = ibead;
 	jbead_pair_list_rep[nil_rep] = jbead;
 	itype_pair_list_rep[nil_rep] = itype;
 	jtype_pair_list_rep[nil_rep] = jtype;
+	nil_rep++;
       }
     }
     in.close();
@@ -241,7 +241,7 @@ void load(int icmd)
     tokPtr = strtok(NULL," ");
     nbead = atoi(tokPtr); // read in number of beads
     init_pos(nbead);
-    for( int i=1; i<=nbead; i++ ) {
+    for( int i=0; i<nbead; i++ ) {
       in.getline(line,2048);
       tokPtr = strtok(line," ");
       tokPtr = strtok(NULL," ");
@@ -270,9 +270,9 @@ void alloc_arrays()
   R0sq = R0*R0;
   e_bnd_coeff = k_bnd*R0sq/2.0; // SOP model
   nbnd = 1529;
-  ibead_bnd = new int[nbnd+1];
-  jbead_bnd = new int[nbnd+1];
-  pdb_dist = new double[nbnd+1];
+  ibead_bnd = new int[nbnd];
+  jbead_bnd = new int[nbnd];
+  pdb_dist = new double[nbnd];
   bnds_allocated = 1;
 
   // angles
@@ -280,10 +280,10 @@ void alloc_arrays()
   k_ang = 20.0;
   e_ang_coeff = k_ang/2.0;
   nang = 1528;
-  ibead_ang = new int[nang+1];
-  jbead_ang = new int[nang+1];
-  kbead_ang = new int[nang+1];
-  pdb_ang = new double[nang+1];
+  ibead_ang = new int[nang];
+  jbead_ang = new int[nang];
+  kbead_ang = new int[nang];
+  pdb_ang = new double[nang];
   angs_allocated = 1;
 
   sigma_ss = 3.5; // = 0.76*a
@@ -311,56 +311,56 @@ void alloc_arrays()
     }
   }
 
-  ibead_lj_nat = new int[ncon_att+1];
-  jbead_lj_nat = new int[ncon_att+1];
-  itype_lj_nat = new int[ncon_att+1];
-  jtype_lj_nat = new int[ncon_att+1];
-  lj_nat_pdb_dist = new double[ncon_att+1];
-  lj_nat_pdb_dist2 = new double[ncon_att+1];
-  lj_nat_pdb_dist6 = new double[ncon_att+1];
-  lj_nat_pdb_dist12 = new double[ncon_att+1];
-  ibead_lj_non_nat = new int[ncon_rep+1];
-  jbead_lj_non_nat = new int[ncon_rep+1];
-  itype_lj_non_nat = new int[ncon_rep+1];
-  jtype_lj_non_nat = new int[ncon_rep+1];
+  ibead_lj_nat = new int[ncon_att];
+  jbead_lj_nat = new int[ncon_att];
+  itype_lj_nat = new int[ncon_att];
+  jtype_lj_nat = new int[ncon_att];
+  lj_nat_pdb_dist = new double[ncon_att];
+  lj_nat_pdb_dist2 = new double[ncon_att];
+  lj_nat_pdb_dist6 = new double[ncon_att];
+  lj_nat_pdb_dist12 = new double[ncon_att];
+  ibead_lj_non_nat = new int[ncon_rep];
+  jbead_lj_non_nat = new int[ncon_rep];
+  itype_lj_non_nat = new int[ncon_rep];
+  jtype_lj_non_nat = new int[ncon_rep];
 
-  ibead_neighbor_list_att = new int[ncon_att+1];
-  jbead_neighbor_list_att = new int[ncon_att+1];
-  itype_neighbor_list_att = new int[ncon_att+1];
-  jtype_neighbor_list_att = new int[ncon_att+1];
-  nl_lj_nat_pdb_dist = new double[ncon_att+1];
-  nl_lj_nat_pdb_dist2 = new double[ncon_att+1];
-  nl_lj_nat_pdb_dist6 = new double[ncon_att+1];
-  nl_lj_nat_pdb_dist12 = new double[ncon_att+1];
-  ibead_neighbor_list_rep = new int[ncon_rep+1];
-  jbead_neighbor_list_rep = new int[ncon_rep+1];
-  itype_neighbor_list_rep = new int[ncon_rep+1];
-  jtype_neighbor_list_rep = new int[ncon_rep+1];
+  ibead_neighbor_list_att = new int[ncon_att];
+  jbead_neighbor_list_att = new int[ncon_att];
+  itype_neighbor_list_att = new int[ncon_att];
+  jtype_neighbor_list_att = new int[ncon_att];
+  nl_lj_nat_pdb_dist = new double[ncon_att];
+  nl_lj_nat_pdb_dist2 = new double[ncon_att];
+  nl_lj_nat_pdb_dist6 = new double[ncon_att];
+  nl_lj_nat_pdb_dist12 = new double[ncon_att];
+  ibead_neighbor_list_rep = new int[ncon_rep];
+  jbead_neighbor_list_rep = new int[ncon_rep];
+  itype_neighbor_list_rep = new int[ncon_rep];
+  jtype_neighbor_list_rep = new int[ncon_rep];
 
-  ibead_pair_list_att = new int[ncon_att+1];
-  jbead_pair_list_att = new int[ncon_att+1];
-  itype_pair_list_att = new int[ncon_att+1];
-  jtype_pair_list_att = new int[ncon_att+1];
-  pl_lj_nat_pdb_dist = new double[ncon_att+1];
-  pl_lj_nat_pdb_dist2 = new double[ncon_att+1];
-  pl_lj_nat_pdb_dist6 = new double[ncon_att+1];
-  pl_lj_nat_pdb_dist12 = new double[ncon_att+1];
-  ibead_pair_list_rep = new int[ncon_rep+1];
-  jbead_pair_list_rep = new int[ncon_rep+1];
-  itype_pair_list_rep = new int[ncon_rep+1];
-  jtype_pair_list_rep = new int[ncon_rep+1];
+  ibead_pair_list_att = new int[ncon_att];
+  jbead_pair_list_att = new int[ncon_att];
+  itype_pair_list_att = new int[ncon_att];
+  jtype_pair_list_att = new int[ncon_att];
+  pl_lj_nat_pdb_dist = new double[ncon_att];
+  pl_lj_nat_pdb_dist2 = new double[ncon_att];
+  pl_lj_nat_pdb_dist6 = new double[ncon_att];
+  pl_lj_nat_pdb_dist12 = new double[ncon_att];
+  ibead_pair_list_rep = new int[ncon_rep];
+  jbead_pair_list_rep = new int[ncon_rep];
+  itype_pair_list_rep = new int[ncon_rep];
+  jtype_pair_list_rep = new int[ncon_rep];
 
   lj_rna_rna_allocated = 1;
 
   // coordinates
 
   nbead = 1530;
-  pos = new float3[nbead+1];
-  unc_pos = new float3[nbead+1];
-  vel = new float3[nbead+1];
-  force = new float3[nbead+1];
-  rna_base = new int [nbead+1];
-  rna_phosphate = new int [nbead+1];
+  pos = new float3[nbead];
+  unc_pos = new float3[nbead];
+  vel = new float3[nbead];
+  force = new float3[nbead];
+  rna_base = new int [nbead];
+  rna_phosphate = new int [nbead];
   pos_allocated = 1;
   unc_pos_allocated = 1;
   vel_allocated = 1;
@@ -414,9 +414,9 @@ void init_bonds(int numbonds)
   using namespace std;
 
   nbnd = numbonds;
-  ibead_bnd = new int[numbonds+1];
-  jbead_bnd = new int[numbonds+1];
-  pdb_dist = new double[numbonds+1];
+  ibead_bnd = new int[numbonds];
+  jbead_bnd = new int[numbonds];
+  pdb_dist = new double[numbonds];
   bnds_allocated = 1;
 }
 
@@ -437,10 +437,10 @@ void init_angles(int numangs)
   using namespace std;
 
   nang = numangs;
-  ibead_ang = new int[numangs+1];
-  jbead_ang = new int[numangs+1];
-  kbead_ang = new int[numangs+1];
-  pdb_ang = new double[numangs+1];
+  ibead_ang = new int[numangs];
+  jbead_ang = new int[numangs];
+  kbead_ang = new int[numangs];
+  pdb_ang = new double[numangs];
   angs_allocated = 1;
 
 }
@@ -499,44 +499,44 @@ void init_lj(int numatt, int numrep )
 
   ncon_att = numatt;
   ncon_rep = numrep;
-  ibead_lj_nat = new int[numatt+1];
-  jbead_lj_nat = new int[numatt+1];
-  itype_lj_nat = new int[numatt+1];
-  jtype_lj_nat = new int[numatt+1];
-  lj_nat_pdb_dist = new double[numatt+1];
-  lj_nat_pdb_dist2 = new double[numatt+1];
-  lj_nat_pdb_dist6 = new double[numatt+1];
-  lj_nat_pdb_dist12 = new double[numatt+1];
-  ibead_lj_non_nat = new int[numrep+1];
-  jbead_lj_non_nat = new int[numrep+1];
-  itype_lj_non_nat = new int[numrep+1];
-  jtype_lj_non_nat = new int[numrep+1];
+  ibead_lj_nat = new int[numatt];
+  jbead_lj_nat = new int[numatt];
+  itype_lj_nat = new int[numatt];
+  jtype_lj_nat = new int[numatt];
+  lj_nat_pdb_dist = new double[numatt];
+  lj_nat_pdb_dist2 = new double[numatt];
+  lj_nat_pdb_dist6 = new double[numatt];
+  lj_nat_pdb_dist12 = new double[numatt];
+  ibead_lj_non_nat = new int[numrep];
+  jbead_lj_non_nat = new int[numrep];
+  itype_lj_non_nat = new int[numrep];
+  jtype_lj_non_nat = new int[numrep];
 
-  ibead_neighbor_list_att = new int[numatt+1];
-  jbead_neighbor_list_att = new int[numatt+1];
-  itype_neighbor_list_att = new int[numatt+1];
-  jtype_neighbor_list_att = new int[numatt+1];
-  nl_lj_nat_pdb_dist = new double[numatt+1];
-  nl_lj_nat_pdb_dist2 = new double[numatt+1];
-  nl_lj_nat_pdb_dist6 = new double[numatt+1];
-  nl_lj_nat_pdb_dist12 = new double[numatt+1];
-  ibead_neighbor_list_rep = new int[numrep+1];
-  jbead_neighbor_list_rep = new int[numrep+1];
-  itype_neighbor_list_rep = new int[numrep+1];
-  jtype_neighbor_list_rep = new int[numrep+1];
+  ibead_neighbor_list_att = new int[numatt];
+  jbead_neighbor_list_att = new int[numatt];
+  itype_neighbor_list_att = new int[numatt];
+  jtype_neighbor_list_att = new int[numatt];
+  nl_lj_nat_pdb_dist = new double[numatt];
+  nl_lj_nat_pdb_dist2 = new double[numatt];
+  nl_lj_nat_pdb_dist6 = new double[numatt];
+  nl_lj_nat_pdb_dist12 = new double[numatt];
+  ibead_neighbor_list_rep = new int[numrep];
+  jbead_neighbor_list_rep = new int[numrep];
+  itype_neighbor_list_rep = new int[numrep];
+  jtype_neighbor_list_rep = new int[numrep];
 
-  ibead_pair_list_att = new int[numatt+1];
-  jbead_pair_list_att = new int[numatt+1];
-  itype_pair_list_att = new int[numatt+1];
-  jtype_pair_list_att = new int[numatt+1];
-  pl_lj_nat_pdb_dist = new double[numatt+1];
-  pl_lj_nat_pdb_dist2 = new double[numatt+1];
-  pl_lj_nat_pdb_dist6 = new double[numatt+1];
-  pl_lj_nat_pdb_dist12 = new double[numatt+1];
-  ibead_pair_list_rep = new int[numrep+1];
-  jbead_pair_list_rep = new int[numrep+1];
-  itype_pair_list_rep = new int[numrep+1];
-  jtype_pair_list_rep = new int[numrep+1];
+  ibead_pair_list_att = new int[numatt];
+  jbead_pair_list_att = new int[numatt];
+  itype_pair_list_att = new int[numatt];
+  jtype_pair_list_att = new int[numatt];
+  pl_lj_nat_pdb_dist = new double[numatt];
+  pl_lj_nat_pdb_dist2 = new double[numatt];
+  pl_lj_nat_pdb_dist6 = new double[numatt];
+  pl_lj_nat_pdb_dist12 = new double[numatt];
+  ibead_pair_list_rep = new int[numrep];
+  jbead_pair_list_rep = new int[numrep];
+  itype_pair_list_rep = new int[numrep];
+  jtype_pair_list_rep = new int[numrep];
 
   lj_rna_rna_allocated = 1;
 
@@ -546,11 +546,11 @@ void init_pos(int nbead)
 {
   using namespace std;
 
-  unc_pos = new float3[nbead+1];
-  pos = new float3[nbead+1];
+  unc_pos = new float3[nbead];
+  pos = new float3[nbead];
 
-  vel = new float3[nbead+1];
-  force = new float3[nbead+1];
+  vel = new float3[nbead];
+  force = new float3[nbead];
 
   pos_allocated = 1;
   unc_pos_allocated = 1;

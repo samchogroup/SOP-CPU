@@ -13,7 +13,7 @@ void update_cell_list() {
   nnl_att = 0;
   nnl_rep = 0;
 
-  for (int i=1; i<=ncon_att; i++) {
+  for (int i=0; i<ncon_att; i++) {
 
     ibead = ibead_lj_nat[i];
     jbead = jbead_lj_nat[i];
@@ -56,7 +56,7 @@ void update_cell_list() {
     }
   }
 
-  for (int i=1; i<=ncon_rep; i++) {
+  for (int i=0; i<ncon_rep; i++) {
 
     ibead = ibead_lj_non_nat[i];
     jbead = jbead_lj_non_nat[i];

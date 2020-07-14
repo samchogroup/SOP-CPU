@@ -15,9 +15,9 @@ coord::~coord() {
 const int debug = 0;
 
 int ncmd;
-char cmd[mcmd+1][mwdsize];
-char opt[mopt_tot+1][mwdsize];
-int opt_ptr[mcmd+1];
+char cmd[mcmd][mwdsize];
+char opt[mopt_tot][mwdsize];
+int opt_ptr[mcmd];
 char pathname[MAXPATHLEN];
 
 // bonded info

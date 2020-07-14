@@ -36,7 +36,7 @@ void clear_forces() {
 
   using namespace std;
 
-  for( int i=1; i<=nbead; i++ ) {
+  for( int i=0; i<nbead; i++ ) {
     force[i].x = 0.0;
     force[i].y = 0.0;
     force[i].z = 0.0;
@@ -122,10 +122,10 @@ void fene_energy()
   char line[2048];
 
   e_bnd = 0.0;
-  for( int i=1; i<=nbnd; i++ ) {
+  for( int i=0; i<nbnd; i++ ) {
 
-    ibead = ibead_bnd[i];
-    jbead = jbead_bnd[i];
+    ibead = ibead_bnd[i] - 1;
+    jbead = jbead_bnd[i] - 1;
 
     dx = unc_pos[jbead].x-unc_pos[ibead].x;
     dy = unc_pos[jbead].y-unc_pos[ibead].y;
@@ -161,10 +161,10 @@ void soft_sphere_angular_energy()
   coord r_ik;
   double d,d6;
 
-    for( int i=1; i<=nang; i++ ) {
+    for( int i=0; i<nang; i++ ) {
 
-      ibead = ibead_ang[i];
-      kbead = kbead_ang[i];
+      ibead = ibead_ang[i] - 1;
+      kbead = kbead_ang[i] - 1;
 
       r_ik.x = unc_pos[kbead].x - unc_pos[ibead].x;
       r_ik.y = unc_pos[kbead].y - unc_pos[ibead].y;
@@ -200,10 +200,10 @@ void vdw_energy()
   e_vdw_rr_att = 0.0;
   e_vdw_rr_rep = 0.0;
 
-  for( int i=1; i<=nil_att; i++ ) {
+  for( int i=0; i<nil_att; i++ ) {
 
-    ibead = ibead_pair_list_att[i];
-    jbead = jbead_pair_list_att[i];
+    ibead = ibead_pair_list_att[i] - 1;
+    jbead = jbead_pair_list_att[i] - 1;
     itype = itype_pair_list_att[i];
     jtype = jtype_pair_list_att[i];
 
@@ -225,10 +225,10 @@ void vdw_energy()
 
   }
 
-  for( int i=1; i<=nil_rep; i++ ) {
+  for( int i=0; i<nil_rep; i++ ) {
 
-    ibead = ibead_pair_list_rep[i];
-    jbead = jbead_pair_list_rep[i];
+    ibead = ibead_pair_list_rep[i] - 1;
+    jbead = jbead_pair_list_rep[i] - 1;
     itype = itype_pair_list_rep[i];
     jtype = jtype_pair_list_rep[i];
 
@@ -271,10 +271,10 @@ void vdw_forces()
   const static double tol = 1.0e-7;
   double rep_tol;
 
-  for( int i=1; i<=nil_att; i++ ) {
+  for( int i=0; i<nil_att; i++ ) {
 
-    ibead = ibead_pair_list_att[i];
-    jbead = jbead_pair_list_att[i];
+    ibead = ibead_pair_list_att[i] - 1;
+    jbead = jbead_pair_list_att[i] - 1;
     itype = itype_pair_list_att[i];
     jtype = jtype_pair_list_att[i];
 
@@ -310,10 +310,10 @@ void vdw_forces()
 
   }
 
-  for( int i=1; i<=nil_rep; i++ ) {
+  for( int i=0; i<nil_rep; i++ ) {
 
-    ibead = ibead_pair_list_rep[i];
-    jbead = jbead_pair_list_rep[i];
+    ibead = ibead_pair_list_rep[i] - 1;
+    jbead = jbead_pair_list_rep[i] - 1;
     itype = itype_pair_list_rep[i];
     jtype = jtype_pair_list_rep[i];
 
@@ -363,10 +363,10 @@ void soft_sphere_angular_forces()
   double fx,fy,fz;
   double co1;
 
-  for( int i=1; i<=nang; i++ ) {
+  for( int i=0; i<nang; i++ ) {
 
-      ibead = ibead_ang[i];
-      kbead = kbead_ang[i];
+      ibead = ibead_ang[i] - 1;
+      kbead = kbead_ang[i] - 1;
 
       dx = unc_pos[kbead].x - unc_pos[ibead].x;
       dy = unc_pos[kbead].y - unc_pos[ibead].y;
@@ -412,10 +412,10 @@ void fene_forces()
 
   char line[2048];
 
-  for( int i=1; i<=nbnd; i++ ) {
+  for( int i=0; i<nbnd; i++ ) {
 
-    ibead = ibead_bnd[i];
-    jbead = jbead_bnd[i];
+    ibead = ibead_bnd[i] - 1;
+    jbead = jbead_bnd[i] - 1;
 
     dx = unc_pos[jbead].x-unc_pos[ibead].x;
     dy = unc_pos[jbead].y-unc_pos[ibead].y;
@@ -455,7 +455,7 @@ void random_force() {
 
   var = sqrt(2.0*T*zeta/h);
 
-  for( int i=1; i<=nbead; i++ ) {
+  for( int i=0; i<nbead; i++ ) {
     force[i].x += var*generator.gasdev();
     force[i].y += var*generator.gasdev();
     force[i].z += var*generator.gasdev();

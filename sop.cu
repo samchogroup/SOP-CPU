@@ -104,7 +104,7 @@ void underdamped_ctrl()
   coord* incr = new coord[nbead+1];
 
   if( (!restart)&&first_time ) { // zero out the velocities and forces
-    for( int i=1; i<=nbead; i++ ) {
+    for( int i=0; i<nbead; i++ ) {
       vel[i].x = 0.0;
       vel[i].y = 0.0;
       vel[i].z = 0.0;
@@ -216,7 +216,7 @@ void calculate_observables(coord* increment)
   // chi, contct_nat, contct_tot, Q
 
   contct_nat = 0;
-  for( int i=1; i<=ncon_att; i++ ) {
+  for( int i=0; i<ncon_att; i++ ) {
 
     ibead = ibead_lj_nat[i];
     jbead = jbead_lj_nat[i];
@@ -243,7 +243,7 @@ void calculate_observables(coord* increment)
   // rgsq
 
   rgsq = 0.0;
-  for( int i=1; i<=nbead-1; i++ ) {
+  for( int i=0; i<nbead-1; i++ ) {
     for( int j=i+1; j<=nbead; j++ ) {
       dx = unc_pos[i].x-unc_pos[j].x;
       dy = unc_pos[i].y-unc_pos[j].y;
@@ -261,7 +261,7 @@ void calculate_observables(coord* increment)
 
   if( sim_type == 1 ) {
     sumvsq = 0.0;
-    for( int i=1; i<=nbead; i++ ) {
+    for( int i=0; i<nbead; i++ ) {
       sumvsq += vel[i].x*vel[i].x
 	+ vel[i].y*vel[i].y
 	+ vel[i].z*vel[i].z;
@@ -269,7 +269,7 @@ void calculate_observables(coord* increment)
     kinT = sumvsq/(3.0*double(nbead));
   } else if( sim_type == 2 ) {
     sumvsq = 0.0;
-    for( int i=1; i<=nbead; i++ ) {
+    for( int i=0; i<nbead; i++ ) {
       sumvsq += increment[i].x*increment[i].x +
 	increment[i].y*increment[i].y +
 	increment[i].z*increment[i].z;
@@ -285,7 +285,7 @@ void underdamped_iteration(coord* incr)
 
   static const double eps = 1.0e-5;
 
-  for( int i=1; i<=nbead; i++ ) {
+  for( int i=0; i<nbead; i++ ) {
 
     // compute position increments
 
@@ -317,7 +317,7 @@ void underdamped_iteration(coord* incr)
 
   // update_velocities
 
-  for( int i=1; i<=nbead; i++ ) {
+  for( int i=0; i<nbead; i++ ) {
 
     // compute velocity increments
 
@@ -332,7 +332,7 @@ void overdamped_iteration(coord* incr)
 {
    using namespace std;
 
-   for( int i=1; i<=nbead; i++ ) {
+   for( int i=0; i<nbead; i++ ) {
 
       // compute position increments
 
@@ -376,7 +376,7 @@ void overdamped_ctrl()
   coord* incr = new coord[nbead+1];
 
   if( (!restart)&&first_time ) { // zero out the velocities and forces
-    for( int i=1; i<=nbead; i++ ) {
+    for( int i=0; i<nbead; i++ ) {
       vel[i].x = 0.0;
       vel[i].y = 0.0;
       vel[i].z = 0.0;
@@ -486,16 +486,16 @@ void update_pair_list() {
   // declare device variables
 
   // should be native distance
-  for (int i=1; i<=nnl_att; i++) {
+  for (int i=0; i<nnl_att; i++) {
 
     ibead = ibead_neighbor_list_att[i];
     jbead = jbead_neighbor_list_att[i];
     itype = itype_neighbor_list_att[i];
     jtype = jtype_neighbor_list_att[i];
 
-    dx = unc_pos[jbead].x - unc_pos[ibead].x;
-    dy = unc_pos[jbead].y - unc_pos[ibead].y;
-    dz = unc_pos[jbead].z - unc_pos[ibead].z;
+    dx = unc_pos[jbead-1].x - unc_pos[ibead-1].x;
+    dy = unc_pos[jbead-1].y - unc_pos[ibead-1].y;
+    dz = unc_pos[jbead-1].z - unc_pos[ibead-1].z;
 
     dx -= boxl*rnd(dx/boxl);
     dy -= boxl*rnd(dy/boxl);
@@ -508,7 +508,6 @@ void update_pair_list() {
 
     if (d2 < rcut2) {
       // add to interaction pair list
-      nil_att++;
       ibead_pair_list_att[nil_att] = ibead;
       jbead_pair_list_att[nil_att] = jbead;
       itype_pair_list_att[nil_att] = itype;
@@ -517,20 +516,21 @@ void update_pair_list() {
       pl_lj_nat_pdb_dist2[nil_att] = nl_lj_nat_pdb_dist2[i];
       pl_lj_nat_pdb_dist6[nil_att] = nl_lj_nat_pdb_dist6[i];
       pl_lj_nat_pdb_dist12[nil_att] = nl_lj_nat_pdb_dist12[i];
+      nil_att++;
     }
 
   }
 
-  for (int i=1; i<=nnl_rep; i++) {
+  for (int i=0; i<nnl_rep; i++) {
 
     ibead = ibead_neighbor_list_rep[i];
     jbead = jbead_neighbor_list_rep[i];
     itype = itype_neighbor_list_rep[i];
     jtype = jtype_neighbor_list_rep[i];
 
-    dx = unc_pos[jbead].x - unc_pos[ibead].x;
-    dy = unc_pos[jbead].y - unc_pos[ibead].y;
-    dz = unc_pos[jbead].z - unc_pos[ibead].z;
+    dx = unc_pos[jbead-1].x - unc_pos[ibead-1].x;
+    dy = unc_pos[jbead-1].y - unc_pos[ibead-1].y;
+    dz = unc_pos[jbead-1].z - unc_pos[ibead-1].z;
 
     dx -= boxl*rnd(dx/boxl);
     dy -= boxl*rnd(dy/boxl);
@@ -543,11 +543,11 @@ void update_pair_list() {
 
     if (d2 < rcut2) {
       // add to interaction pair list
-      nil_rep++;
       ibead_pair_list_rep[nil_rep] = ibead;
       jbead_pair_list_rep[nil_rep] = jbead;
       itype_pair_list_rep[nil_rep] = itype;
       jtype_pair_list_rep[nil_rep] = jtype;
+      nil_rep++;
     }
   }
 }
